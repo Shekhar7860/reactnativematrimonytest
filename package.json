@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@react-native-community/toolbar-android": "^0.1.0-rc.2",
-    "@react-native-firebase/app": "^8.4.0",
+    "@react-native-firebase/app": "^8.4.1",
+    "@react-native-firebase/auth": "^9.1.2",
     "@react-native-firebase/database": "^7.5.1",
     "@react-native-firebase/messaging": "^7.8.1",
     "@react-native-firebase/storage": "^7.4.1",

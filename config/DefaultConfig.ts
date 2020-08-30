@@ -2,124 +2,124 @@ import { ThemeKey } from "./themes";
 import { LanguageKey } from "./languages";
 
 export interface AppTheme {
-  backgroundColor: string,
-  highlightColor: string,
-  highlightTextColor: string,
-  cardTextColor: string,
-  textColor: string,
-  lightTextColor: string,
-  lightBottomColor: string,
-  profileColor: string,
-  profileTextColor: string,
-  profilePlaceholder: string,
-  alternateMessageBackgroundColor: string,
-  appColor: string,
-  facebookColor: string,
-  googleColor: string,
-  twitterColor: string,
-  inputColor: string,
-  inputBorderColor: string,
-  errorColor: string,
-  forgetColor: string,
-  premiumColor: string,
-  notifyColor: string,
-  successColor: string,
+  backgroundColor: string;
+  highlightColor: string;
+  highlightTextColor: string;
+  cardTextColor: string;
+  textColor: string;
+  lightTextColor: string;
+  lightBottomColor: string;
+  profileColor: string;
+  profileTextColor: string;
+  profilePlaceholder: string;
+  alternateMessageBackgroundColor: string;
+  appColor: string;
+  facebookColor: string;
+  googleColor: string;
+  twitterColor: string;
+  inputColor: string;
+  inputBorderColor: string;
+  errorColor: string;
+  forgetColor: string;
+  premiumColor: string;
+  notifyColor: string;
+  successColor: string;
 }
 
 export interface AppConstants {
-  selectedTheme: ThemeKey,
-  selectedLanguage: LanguageKey,
-  defaultTheme: string,
-  defaultLanguage: string,
-  title: string,
-  matching: string,
-  forgetText: string,
-  profileName: string,
-  matched: string,
-  profile: string,
-  premium: string,
-  GenderText: string,
-  matchText: string,
-  message: string,
-  gifts: string,
-  welcome: string,
-  slogan: string,
-  recraftLogo: any,
-  backText: string,
-  labelLogin: string,
-  labelSign: string,
-  labelCheckAcc: string,
-  labelChoice: string,
-  labelSignin: string,
-  labelSignup: string,
-  phonePlaceholder: string,
-  emailPlaceholder: string,
-  userPlaceholder: string,
-  passPlaceholder: string,
-  namePlaceholder: string,
-  confirmPlaceholder: string,
-  labelForget: string,
-  labelSignupOr: string,
-  labelSignupWith: string,
-  checkText: string,
-  activatePremium: string,
-  activateYearly: string,
-  save: string,
-  choiceOne: string,
-  resetPass: string,
-  newAccount: string,
-  selectGender: string,
-  editProfile: string,
-  searching: string,
-  nearby: string,
-  discover: string,
-  calling: string,
-  perMonth: string,
-  perYear: string,
-  payment: string,
-  newCard: string,
-  saveCard: string,
-  paymentDone: string,
-  messageText: string,
-  loginValidation: loginValidation,
-  signupValidation: signupValidation,
-  cardValidation: cardValidation,
+  selectedTheme: ThemeKey;
+  selectedLanguage: LanguageKey;
+  defaultTheme: string;
+  defaultLanguage: string;
+  title: string;
+  matching: string;
+  forgetText: string;
+  profileName: string;
+  matched: string;
+  profile: string;
+  premium: string;
+  GenderText: string;
+  matchText: string;
+  message: string;
+  gifts: string;
+  welcome: string;
+  slogan: string;
+  recraftLogo: any;
+  backText: string;
+  labelLogin: string;
+  labelSign: string;
+  labelCheckAcc: string;
+  labelChoice: string;
+  labelSignin: string;
+  labelSignup: string;
+  phonePlaceholder: string;
+  emailPlaceholder: string;
+  userPlaceholder: string;
+  passPlaceholder: string;
+  namePlaceholder: string;
+  confirmPlaceholder: string;
+  labelForget: string;
+  labelSignupOr: string;
+  labelSignupWith: string;
+  checkText: string;
+  activatePremium: string;
+  activateYearly: string;
+  save: string;
+  choiceOne: string;
+  resetPass: string;
+  newAccount: string;
+  selectGender: string;
+  editProfile: string;
+  searching: string;
+  nearby: string;
+  discover: string;
+  calling: string;
+  perMonth: string;
+  perYear: string;
+  payment: string;
+  newCard: string;
+  saveCard: string;
+  paymentDone: string;
+  messageText: string;
+  loginValidation: loginValidation;
+  signupValidation: signupValidation;
+  cardValidation: cardValidation;
 }
 
 export interface loginValidation {
-  username: string,
-  password: string,
-  passwordLength: string,
+  username: string;
+  password: string;
+  passwordLength: string;
 }
 
 export interface cardValidation {
-  cardNumber: string,
-  cardLength: string,
-  expiry: string,
-  expiryValid: string,
-  cvv: string,
-  cvvLength: string,
-  name: string,
+  cardNumber: string;
+  cardLength: string;
+  expiry: string;
+  expiryValid: string;
+  cvv: string;
+  cvvLength: string;
+  name: string;
 }
 
 export interface signupValidation {
-  username: string,
-  email: string,
-  validEmail: string,
-  phone: string,
-  validPhone: string,
-  password: string,
-  passwordLength: string,
-  confirmPassword: string,
-  checkPassword: string,
+  username: string;
+  email: string;
+  validEmail: string;
+  phone: string;
+  validPhone: string;
+  password: string;
+  passwordLength: string;
+  confirmPassword: string;
+  checkPassword: string;
 }
 
 export interface ApplicationConfig {
-  constants?: AppConstants
+  constants?: AppConstants;
 }
 
 // @ts-ignore
-const Logo = require("../images/logo.png")
+const Logo = require("../images/logo.png");
 
 export const defaultConfig: ApplicationConfig = {
   constants: {
@@ -142,7 +142,7 @@ export const defaultConfig: ApplicationConfig = {
     message: "Send Message",
     gifts: "Send Gifts",
     GenderText: "Gender",
-    welcome: 'Welcome Back',
+    welcome: "Welcome Back",
     slogan: "Meet and share every moments",
     recraftLogo: Logo,
     backText: "Back",
@@ -177,30 +177,30 @@ export const defaultConfig: ApplicationConfig = {
     saveCard: "Save Card Details",
     payment: "Payment",
     paymentDone: "Payment Done",
-    loginValidation : {
-      username: `Username is required`,
+    loginValidation: {
+      username: `Email is required`,
       password: `Password is required`,
-      passwordLength: 'Password length between 6 and 12',
+      passwordLength: "Password length between 6 and 12",
     },
-    cardValidation : {
+    cardValidation: {
       cardNumber: `Card Number is required`,
-      cardLength: 'Card Number length should be 12 digit',
+      cardLength: "Card Number length should be 12 digit",
       expiry: `Expiry Date is required`,
       expiryValid: `Please enter a valid expiry date`,
       cvv: `CVV is required`,
-      cvvLength: 'CVV length should be 3 digit',
+      cvvLength: "CVV length should be 3 digit",
       name: `Card Holder Name is required`,
     },
-    signupValidation : {
+    signupValidation: {
       username: `Username is required`,
       email: `Email is required`,
-      validEmail: 'Please enter a valid email',
+      validEmail: "Please enter a valid email",
       phone: `Phone No. is required`,
-      validPhone: 'Please enter a valid phone no.',
+      validPhone: "Please enter a valid phone no.",
       password: `Password is required`,
-      passwordLength: 'Password length between 6 and 12',
-      confirmPassword: 'Confirm Password is required',
-      checkPassword: 'Confirm password should be same',
+      passwordLength: "Password length between 6 and 12",
+      confirmPassword: "Confirm Password is required",
+      checkPassword: "Confirm password should be same",
     },
   },
-}
+};

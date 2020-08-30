@@ -1,14 +1,26 @@
-import React from 'react';
-import { RouteComponentProps } from 'react-router-native';
-import { View, ViewStyle, StyleSheet, ImageBackground, Image, ImageStyle, TextStyle, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { Dispatch } from 'redux';
-import { AppTheme, AppConstants } from '../../config/DefaultConfig';
-import useConstants from '../../hooks/useConstants';
+import React, { useState, useEffect } from "react";
+import { RouteComponentProps } from "react-router-native";
+import {
+  View,
+  ViewStyle,
+  StyleSheet,
+  ImageBackground,
+  Image,
+  ImageStyle,
+  TextStyle,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+} from "react-native";
+import { Dispatch } from "redux";
+import { AppTheme, AppConstants } from "../../config/DefaultConfig";
+import useConstants from "../../hooks/useConstants";
 import useTheme from "../../hooks/useTheme";
-import ThemedText from '../../components/UI/ThemedText';
-import FooterNavigation from '../Footer/Index';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Swiper from 'react-native-deck-swiper';
+import ThemedText from "../../components/UI/ThemedText";
+import FooterNavigation from "../Footer/Index";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import Swiper from "react-native-deck-swiper";
+import database from "@react-native-firebase/database";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
@@ -18,95 +30,146 @@ const heart = require("../../images/heart.png");
 const cardImage = require("../../images/new-card.jpg");
 
 interface Props extends RouteComponentProps {
-  dispatch: Dispatch,
-  history: any,
+  dispatch: Dispatch;
+  history: any;
 }
 
-const Matching: React.FunctionComponent<Props> = ({
-  history
-}: Props) => {
+const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
+  const [items, setItems] = useState([]);
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
 
   const backButton = () => {
-    history.push('/gender');
-  }
+    history.push("/gender");
+  };
 
   const goToMatched = () => {
-    history.push('/matched')
-  }
+    history.push("/matched");
+  };
 
+  useEffect(() => {
+    database()
+      .ref("/users")
+      .once("value")
+      .then((dataSnapshot) => {
+        let newdata = dataSnapshot.val();
+        if (dataSnapshot.val()) {
+          let imagesArray = Object.values(newdata);
+          // this.arrayholder = imagesArray;
+          console.group("imagesRaay", imagesArray);
+          setItems([imagesArray]);
+        }
+      });
+  });
+  console.group("item", items);
   return (
     <View style={style.mainContainer}>
-        <ScrollView>
-      <ImageBackground source={ImagePath} style={style.imageStyle} >
+      <ScrollView>
+        <ImageBackground source={ImagePath} style={style.imageStyle}>
           <TouchableOpacity style={style.backContainer} onPress={backButton}>
             <View style={style.leftContainer}>
-              <MaterialIcon name="chevron-left-circle-outline" size={30} color={theme.highlightTextColor} style={style.backIcon}/>
+              <MaterialIcon
+                name="chevron-left-circle-outline"
+                size={30}
+                color={theme.highlightTextColor}
+                style={style.backIcon}
+              />
             </View>
             <View style={style.rightContainer}>
-              <ThemedText styleKey="highlightTextColor" style={style.textStyle}>{constants.backText}</ThemedText>
+              <ThemedText styleKey="highlightTextColor" style={style.textStyle}>
+                {constants.backText}
+              </ThemedText>
             </View>
           </TouchableOpacity>
           <View style={[style.topContainer, style.titleContainer]}>
-            <ThemedText styleKey="highlightTextColor" style={[style.textStyle, style.titleStyle]}>{constants.matching}</ThemedText>
+            <ThemedText
+              styleKey="highlightTextColor"
+              style={[style.textStyle, style.titleStyle]}
+            >
+              {constants.matching}
+            </ThemedText>
           </View>
           <Swiper
-            cards={['Abraham', 'Abraham', 'Abraham', 'WHAT', 'MAKES', 'YOU', 'HAPPY']}
+            cards={items}
             renderCard={(card) => {
-                return (
-                    <View style={style.card}>
-                        <Image source={cardImage} style={style.imageCard}/>
-                        <ThemedText styleKey="cardTextColor" style={style.text}>{card}</ThemedText>
-                        <View style={style.childContainer}>
-                            <TouchableOpacity>
-                                <View style={style.cardIcon}>
-                                    <MaterialIcon name="gender-male" size={15} color={theme.highlightTextColor} style={style.Icon} />
-                                </View>
-                            </TouchableOpacity>
-                            <TouchableOpacity>
-                                <View style={style.cardContent}>
-                                    <ThemedText styleKey="highlightTextColor" style={{fontWeight: "bold", textAlign: "center"}}>26</ThemedText>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                        <ThemedText styleKey="cardTextColor" style={[style.text, style.textStyle]}>{card}</ThemedText>
-                    </View>
-                )
+              console.log("card", card);
+              return (
+                <View style={style.card}>
+                  <Image
+                    source={{ uri: card ? card.image : null }}
+                    style={style.imageCard}
+                  />
+                  <ThemedText styleKey="cardTextColor" style={style.text}>
+                    {card}
+                  </ThemedText>
+                  <View style={style.childContainer}>
+                    <TouchableOpacity>
+                      <View style={style.cardIcon}>
+                        <MaterialIcon
+                          name="gender-male"
+                          size={15}
+                          color={theme.highlightTextColor}
+                          style={style.Icon}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                      <View style={style.cardContent}>
+                        <ThemedText
+                          styleKey="highlightTextColor"
+                          style={{ fontWeight: "bold", textAlign: "center" }}
+                        >
+                          26
+                        </ThemedText>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                  <ThemedText
+                    styleKey="cardTextColor"
+                    style={[style.text, style.textStyle]}
+                  >
+                    {card}
+                  </ThemedText>
+                </View>
+              );
             }}
-            onSwiped={(cardIndex) => {console.log(cardIndex)}}
-            onSwipedAll={() => {console.log('onSwipedAll')}}
+            onSwiped={(cardIndex) => {
+              console.log(cardIndex);
+            }}
+            onSwipedAll={() => {
+              console.log("onSwipedAll");
+            }}
             cardIndex={0}
-            useViewOverflow={Platform.OS === 'ios'}
-            backgroundColor={'transparent'}
-            stackSize= {4}
+            useViewOverflow={Platform.OS === "ios"}
+            backgroundColor={"transparent"}
+            stackSize={4}
             infinite
-            cardStyle={{paddingTop: 70}}>
-          </Swiper>
+            cardStyle={{ paddingTop: 70 }}
+          />
           <View style={style.bottomContainer}>
             <View style={style.bottomContent}>
               <View style={style.childContainer}>
                 <View style={style.iconContainer}>
                   <TouchableOpacity>
-                    <Image source={cross} style={style.logoImage}/>
+                    <Image source={cross} style={style.logoImage} />
                   </TouchableOpacity>
                 </View>
                 <View style={style.iconContainer}>
                   <TouchableOpacity onPress={goToMatched}>
-                    <Image source={chat} style={style.specialStyle}/>
+                    <Image source={chat} style={style.specialStyle} />
                   </TouchableOpacity>
                 </View>
                 <View style={style.iconContainer}>
                   <TouchableOpacity>
-                    <Image source={heart} style={style.logoImage}/>
+                    <Image source={heart} style={style.logoImage} />
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
           </View>
-      </ImageBackground>
+        </ImageBackground>
       </ScrollView>
-      <FooterNavigation history={history} />    
+      <FooterNavigation history={history} />
     </View>
   );
 };
@@ -144,30 +207,30 @@ const style: Style = StyleSheet.create<Style>({
     padding: 0,
     margin: 0,
     fontSize: 16,
-    justifyContent: 'center',
-    flexDirection: 'column',
+    justifyContent: "center",
+    flexDirection: "column",
   },
-  imageStyle: { 
-    width: '100%', 
+  imageStyle: {
+    width: "100%",
     height: 830,
   },
   topContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: 'center',
+    alignItems: "center",
     paddingLeft: 10,
     paddingRight: 10,
     marginTop: 80,
     marginBottom: 20,
   },
   leftContainer: {
-    flex: 0, 
+    flex: 0,
     justifyContent: "flex-start",
   },
   rightContainer: {
-    flex: 3, 
-    justifyContent: "center", 
-    paddingTop: 17, 
+    flex: 3,
+    justifyContent: "center",
+    paddingTop: 17,
     paddingLeft: 5,
   },
   backIcon: {
@@ -176,22 +239,22 @@ const style: Style = StyleSheet.create<Style>({
     paddingLeft: 25,
   },
   textStyle: {
-    fontSize: 16, 
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: "bold",
   },
   backContainer: {
-    flexDirection: 'row', 
-    justifyContent: "space-between", 
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingLeft: 10,
-    zIndex: 9999
+    zIndex: 9999,
   },
   titleStyle: {
-    fontSize: 32, 
-    textTransform: 'capitalize'
+    fontSize: 32,
+    textTransform: "capitalize",
   },
   titleContainer: {
-    marginTop: 0, 
-    marginBottom: 30
+    marginTop: 0,
+    marginBottom: 30,
   },
   card: {
     borderRadius: 40,
@@ -199,19 +262,19 @@ const style: Style = StyleSheet.create<Style>({
     borderColor: "#E8E8E8",
     justifyContent: "flex-start",
     backgroundColor: "white",
-    width: '100%',
+    width: "100%",
     height: 470,
   },
   text: {
     textAlign: "center",
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   logoImage: {
-    justifyContent: 'center',
-    width: 90, 
+    justifyContent: "center",
+    width: 90,
     height: 90,
   },
   specialStyle: {
@@ -220,8 +283,8 @@ const style: Style = StyleSheet.create<Style>({
     marginTop: 20,
   },
   bottomContent: {
-    flex: 1, 
-    justifyContent: 'flex-end',
+    flex: 1,
+    justifyContent: "flex-end",
   },
   iconContainer: {
     margin: 12,
@@ -229,42 +292,42 @@ const style: Style = StyleSheet.create<Style>({
     height: 50,
     borderRadius: 50,
   },
-  bottomContainer: { 
-    alignItems: 'flex-end', 
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    position: 'absolute',
-    bottom: 125
+  bottomContainer: {
+    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    position: "absolute",
+    bottom: 125,
   },
   childContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
   },
   imageCard: {
-    width: '100%', 
-    height: 300, 
-    borderTopLeftRadius: 40, 
-    borderTopRightRadius: 40
+    width: "100%",
+    height: 300,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   Icon: {
     justifyContent: "center",
   },
-  cardIcon: { 
-    backgroundColor: '#fc5660', 
-    width: 37, 
-    height: 23, 
-    borderRadius: 20, 
-    marginTop: 5, 
-    paddingTop: 3, 
-    paddingLeft: 10 
+  cardIcon: {
+    backgroundColor: "#fc5660",
+    width: 37,
+    height: 23,
+    borderRadius: 20,
+    marginTop: 5,
+    paddingTop: 3,
+    paddingLeft: 10,
   },
-  cardContent: { 
-    backgroundColor: '#fc5660', 
-    width: 67, 
-    height: 23, 
-    borderRadius: 20, 
-    marginTop: 5, 
-    paddingTop: Platform.OS === 'ios' ? 3 : 1, 
+  cardContent: {
+    backgroundColor: "#fc5660",
+    width: 67,
+    height: 23,
+    borderRadius: 20,
+    marginTop: 5,
+    paddingTop: Platform.OS === "ios" ? 3 : 1,
     marginLeft: 10,
-  }
+  },
 });
