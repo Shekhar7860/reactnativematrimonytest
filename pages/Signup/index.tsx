@@ -14,6 +14,7 @@ import {
   ImageBackground,
   Platform,
   PermissionsAndroid,
+  Button
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
 import ThemedText from "../../components/UI/ThemedText";
@@ -114,6 +115,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
   const [errors, setErrors] = useState<ValidationError>({});
   const [image, setImage] = useState(girl);
   const [imageRef, setImageRef] = useState("");
+  const [gender, setGender] = useState("male");
+  const [color, setColor] = useState("#7f8c8d");
 
   const backButton = () => {
     history.push("/");
@@ -315,6 +318,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 email: email,
                 phone: phone,
                 image: imageRef,
+                gender : gender
               });
 
             database()
@@ -324,6 +328,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 email: email,
                 phone: phone,
                 image: imageRef,
+                gender : gender
               });
             // history.push("/gender/");
             // this.props.navigation.navigate('Home')
@@ -332,7 +337,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
             Alert.alert(error.toString());
           });
       } catch (error) {
-        Alert.alert(error.toString(error), Toast.LONG);
+        Alert.alert(error.toString(error));
       }
       // history.push('/gender/')
     } else {
@@ -430,6 +435,28 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 icon="mobile1"
                 choose={true}
               />
+               <ThemedText styleKey="textColor" style={{ alignSelf : 'flex-start', margin : 10}}>
+                  Gender
+                </ThemedText>
+                <View style={{flexDirection : 'row', marginTop : 5}}>
+                <Button
+                    onPress={() => {
+                        setGender("male")
+                        setColor("#8e44ad")
+                    }}
+                    title="Male"
+                    color={gender == "male" ? "#8e44ad" :  '#7f8c8d'}
+                />
+                <View style={{width:'10%'}}/>
+                <Button
+                    onPress={() => {
+                      setGender("female")
+                      setColor("#8e44ad")
+                    }}
+                    title="Female"
+                    color={gender == "female" ? "#8e44ad" :  '#7f8c8d'}
+                />
+            </View>
               <Input
                 placeholder={constants.passPlaceholder}
                 onChangeText={onChangePassword}

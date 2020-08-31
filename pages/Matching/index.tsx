@@ -28,6 +28,7 @@ const cross = require("../../images/cross.png");
 const chat = require("../../images/chat.png");
 const heart = require("../../images/heart.png");
 const cardImage = require("../../images/new-card.jpg");
+const girlImageUri = "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY"
 
 interface Props extends RouteComponentProps {
   dispatch: Dispatch;
@@ -56,12 +57,12 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
         if (dataSnapshot.val()) {
           let imagesArray = Object.values(newdata);
           // this.arrayholder = imagesArray;
-          console.group("imagesRaay", imagesArray);
-          setItems([imagesArray]);
+          console.log("imagesRaay", imagesArray);
+          setItems(imagesArray);
         }
       });
-  });
-  console.group("item", items);
+    }, []);
+ // console.log("item", items);
   return (
     <View style={style.mainContainer}>
       <ScrollView>
@@ -90,17 +91,17 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
             </ThemedText>
           </View>
           <Swiper
-            cards={items}
+           cards={items}
             renderCard={(card) => {
-              console.log("card", card);
+             // console.log("card", items);
               return (
                 <View style={style.card}>
                   <Image
-                    source={{ uri: card ? card.image : null }}
+                    source={{ uri: card ? card.image : girlImageUri }}
                     style={style.imageCard}
                   />
                   <ThemedText styleKey="cardTextColor" style={style.text}>
-                    {card}
+                    {card ? card.username : null}
                   </ThemedText>
                   <View style={style.childContainer}>
                     <TouchableOpacity>
@@ -128,13 +129,13 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
                     styleKey="cardTextColor"
                     style={[style.text, style.textStyle]}
                   >
-                    {card}
+                    {card ? card.username : null}
                   </ThemedText>
                 </View>
               );
             }}
             onSwiped={(cardIndex) => {
-              console.log(cardIndex);
+             // console.log(cardIndex);
             }}
             onSwipedAll={() => {
               console.log("onSwipedAll");
@@ -143,7 +144,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
             useViewOverflow={Platform.OS === "ios"}
             backgroundColor={"transparent"}
             stackSize={4}
-            infinite
+            // infinite
             cardStyle={{ paddingTop: 70 }}
           />
           <View style={style.bottomContainer}>

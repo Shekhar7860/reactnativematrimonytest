@@ -94,7 +94,7 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
             Alert.alert(error.toString());
           });
       } catch (error) {
-        Alert.alert(error.toString(error), Toast.LONG);
+        Alert.alert(error.toString(error));
       }
     } else {
       setErrors(errors);
