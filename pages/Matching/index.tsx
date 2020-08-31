@@ -21,6 +21,7 @@ import FooterNavigation from "../Footer/Index";
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Swiper from "react-native-deck-swiper";
 import database from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
@@ -28,7 +29,8 @@ const cross = require("../../images/cross.png");
 const chat = require("../../images/chat.png");
 const heart = require("../../images/heart.png");
 const cardImage = require("../../images/new-card.jpg");
-const girlImageUri = "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY"
+const girlImageUri =
+  "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 
 interface Props extends RouteComponentProps {
   dispatch: Dispatch;
@@ -37,6 +39,7 @@ interface Props extends RouteComponentProps {
 
 const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
   const [items, setItems] = useState([]);
+  const [user, setUser] = useState({});
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
 
@@ -61,8 +64,32 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
           setItems(imagesArray);
         }
       });
-    }, []);
- // console.log("item", items);
+
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        console.log("snap", dataSnapshot.val().email);
+        setUser(dataSnapshot.val());
+      });
+  }, []);
+
+  const connect = (item) => {
+    database()
+      .ref("/requests")
+      .push({
+        senderId: user.id,
+        receiverId: item.id,
+        senderName: user.username,
+        receiverName: item.username,
+        senderImage: user.image,
+        receiverImage: item.image,
+        senderEmail: user.email,
+        receiverEmail: item.email,
+      });
+  };
+  // console.log("item", items);
   return (
     <View style={style.mainContainer}>
       <ScrollView>
@@ -91,9 +118,9 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
             </ThemedText>
           </View>
           <Swiper
-           cards={items}
+            cards={items}
             renderCard={(card) => {
-             // console.log("card", items);
+              // console.log("card", items);
               return (
                 <View style={style.card}>
                   <Image
@@ -115,14 +142,17 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity>
-                      <View style={style.cardContent}>
+                      <TouchableOpacity
+                        style={style.cardContent}
+                        onPress={() => connect(card)}
+                      >
                         <ThemedText
                           styleKey="highlightTextColor"
                           style={{ fontWeight: "bold", textAlign: "center" }}
                         >
                           26
                         </ThemedText>
-                      </View>
+                      </TouchableOpacity>
                     </TouchableOpacity>
                   </View>
                   <ThemedText
@@ -135,7 +165,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
               );
             }}
             onSwiped={(cardIndex) => {
-             // console.log(cardIndex);
+              // console.log(cardIndex);
             }}
             onSwipedAll={() => {
               console.log("onSwipedAll");
