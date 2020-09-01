@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-native';
 import { Dispatch } from 'redux';
 import { View, ViewStyle, StyleSheet, TextStyle, Image, ImageStyle, ImageBackground, TouchableOpacity } from 'react-native';
@@ -8,6 +8,8 @@ import useConstants from '../../hooks/useConstants';
 import useTheme from '../../hooks/useTheme';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FooterNavigation from '../Footer/Index';
+import database from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
@@ -29,6 +31,34 @@ const Nearby: React.FunctionComponent<Props> = ({
   const backButton = () => {
     history.push('/matching')
   }
+  useEffect(() => {
+    let requestsArray = [];
+    database()
+    .ref("user")
+    .child(auth().currentUser.uid)
+    .once("value")
+    .then((loggedIn) => {
+      console.log("snap", loggedIn.val());
+      
+    
+      database()
+        .ref("requests")
+        .once("value")
+        .then((dataSnapshot) => {
+          console.log("snap", dataSnapshot.val());
+          dataSnapshot.forEach((child) => {
+           console.log('child', child.val())
+           if(loggedIn.val().id == child.val().receiverId){
+            requestsArray.push(child.val())
+           }
+          });
+
+          console.log('requests', requestsArray)
+         // setImage(dataSnapshot.val().image);
+        });
+      });
+    
+  }, []);
 
   return (
     <>
