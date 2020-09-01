@@ -52,6 +52,8 @@ export interface AppConstants {
   labelChoice: string;
   labelSignin: string;
   labelSignup: string;
+  labelConfirm: string;
+  labelReject: string;
   phonePlaceholder: string;
   emailPlaceholder: string;
   userPlaceholder: string;
@@ -154,6 +156,8 @@ export const defaultConfig: ApplicationConfig = {
     labelSignupOr: "or Sign Up with",
     labelSignin: "Sign in",
     labelSignup: "Sign Up",
+    labelConfirm: "Confirm",
+    labelReject: "Reject",
     phonePlaceholder: "Phone",
     namePlaceholder: "Name",
     emailPlaceholder: "Email",

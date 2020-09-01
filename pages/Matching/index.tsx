@@ -87,6 +87,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
         receiverImage: item.image,
         senderEmail: user.email,
         receiverEmail: item.email,
+        isAccepted : 0
       });
   };
   // console.log("item", items);

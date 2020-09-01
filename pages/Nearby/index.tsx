@@ -10,6 +10,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FooterNavigation from '../Footer/Index';
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
+import RoundButton from "../../components/Base/RoundButton";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
@@ -40,28 +41,38 @@ const Nearby: React.FunctionComponent<Props> = ({
     .child(auth().currentUser.uid)
     .once("value")
     .then((loggedIn) => {
-      console.log("snap", loggedIn.val());
+      // console.log("snap", loggedIn.val());
       
     
       database()
         .ref("requests")
         .once("value")
         .then((dataSnapshot) => {
-          console.log("snap", dataSnapshot.val());
+         // console.log("snap", dataSnapshot.val());
           dataSnapshot.forEach((child) => {
-           console.log('child', child.val())
+           console.log('child', Object.keys( dataSnapshot.val()))
            if(loggedIn.val().id == child.val().receiverId){
-            requestsArray.push(child.val())
+          //  child.key = Object.keys(dataSnapshot.val())[0]
+            requestsArray.push(child)
            }
           });
 
-          console.log('requests', requestsArray)
+       //   console.log('requests', requestsArray)
           setRequests(requestsArray)
+
          // setImage(dataSnapshot.val().image);
         });
       });
     
   }, []);
+
+  const accept = (selected) => {
+   console.log('sel', selected)
+  }
+
+  const reject = (selected) => {
+    console.log('rej', selected)
+  }
 
   return (
     <>
@@ -76,7 +87,29 @@ const Nearby: React.FunctionComponent<Props> = ({
                     style={style.imageStyle}
                   />
                    <Text>{item.senderName}</Text>
-         <View style={{height: 1,backgroundColor:'gray'}}></View>
+         {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+         <View style={{flexDirection : 'row', justifyContent : 'space-around'}}>
+           <View style={{width : '40%'}}>
+           <RoundButton
+              buttonStyle={style.signButton}
+              label={constants.labelConfirm}
+              buttonColor={theme.appColor}
+              labelStyle={theme.highlightTextColor}
+              onPress={ () => accept(item)}
+            />
+            </View>
+           
+            <View style={{width : '40%'}}>
+             <RoundButton
+              buttonStyle={style.signButton}
+              label={constants.labelReject}
+              buttonColor={theme.appColor}
+              labelStyle={theme.highlightTextColor}
+              onPress={ () => reject(item)}
+              //onPress={goToHome}
+            />
+            </View>
+            </View>
          </View>
         }
        />
@@ -159,6 +192,7 @@ interface Style {
   searchStyle: ImageStyle;
   extraStyle: ViewStyle;
   profileStyle: ImageStyle;
+  signButton: ViewStyle;
 }
 
 const style: Style = StyleSheet.create<Style>({
@@ -249,5 +283,9 @@ const style: Style = StyleSheet.create<Style>({
     height: 220, 
     borderTopLeftRadius: 20, 
     borderTopRightRadius: 20
-  }
+  },
+  signButton: {
+    minWidth: 100,
+    marginTop: 30,
+  },
 });
