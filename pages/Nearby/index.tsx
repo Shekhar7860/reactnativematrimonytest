@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-native';
 import { Dispatch } from 'redux';
-import { View, ViewStyle, StyleSheet, TextStyle, Image, ImageStyle, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, ViewStyle, StyleSheet, TextStyle, Image, Text, ImageStyle, ImageBackground, TouchableOpacity,  FlatList } from 'react-native';
 import { AppConstants, AppTheme } from '../../config/DefaultConfig';
 import ThemedText from '../../components/UI/ThemedText';
 import useConstants from '../../hooks/useConstants';
@@ -16,7 +16,8 @@ const ImagePath = require("../../images/dual-tone.png");
 const search = require("../../images/search.png");
 const profile1 = require("../../images/new-boy.jpg");
 const profile2 = require("../../images/new-profile.jpg");
-
+const girlImageUri =
+  "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 interface Props extends RouteComponentProps {
   dispatch: Dispatch,
   history: any
@@ -27,6 +28,7 @@ const Nearby: React.FunctionComponent<Props> = ({
 }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
+  const [requests, setRequests] = useState([]);
 
   const backButton = () => {
     history.push('/matching')
@@ -54,6 +56,7 @@ const Nearby: React.FunctionComponent<Props> = ({
           });
 
           console.log('requests', requestsArray)
+          setRequests(requestsArray)
          // setImage(dataSnapshot.val().image);
         });
       });
@@ -63,7 +66,21 @@ const Nearby: React.FunctionComponent<Props> = ({
   return (
     <>
       <View style={style.mainContainer}>
-        <ImageBackground source={ImagePath} style={style.imageStyle}>
+      <FlatList
+         data={requests}
+         renderItem={({item}) => 
+         <View >
+        
+         <Image
+                    source={{ uri: item ? item.senderImage : girlImageUri }}
+                    style={style.imageStyle}
+                  />
+                   <Text>{item.senderName}</Text>
+         <View style={{height: 1,backgroundColor:'gray'}}></View>
+         </View>
+        }
+       />
+        {/* <ImageBackground source={ImagePath} style={style.imageStyle}>
           <View style={style.backContainer}>
             <TouchableOpacity  onPress={backButton}>
               <View style={style.leftContainer}>
@@ -117,7 +134,7 @@ const Nearby: React.FunctionComponent<Props> = ({
             </View>
           </View>
         </ImageBackground>
-        <FooterNavigation history={history} />    
+        <FooterNavigation history={history} />     */}
       </View>
     </>
   )
@@ -184,8 +201,10 @@ const style: Style = StyleSheet.create<Style>({
     justifyContent: "center",
   },
   imageStyle: {
-    width: '100%', 
-    height: '100%',
+    width: "100%",
+    height: 300,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   searchStyle: {
     justifyContent: 'center',
