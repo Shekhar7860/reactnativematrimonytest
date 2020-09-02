@@ -78,8 +78,10 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
   }, []);
 
   const message = (selected) => {
-    history.push("/chat");
-
+    history.push({
+      pathname: '/chat',
+      state: { detail: selected }
+  });
     // database()
     //   .ref("/requests")
     //   .child(selected.requestKey)
