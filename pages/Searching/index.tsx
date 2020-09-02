@@ -77,6 +77,25 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
       });
   }, []);
 
+  const message = (selected) => {
+    history.push("/chat");
+
+    // database()
+    //   .ref("/requests")
+    //   .child(selected.requestKey)
+    //   .update({
+    //     isAccepted: 1,
+    //   });
+  };
+
+  const contact = (selected) => {
+    console.log("sel", selected);
+    // database()
+    //   .ref("/requests")
+    //   .child(selected.requestKey)
+    //   .remove();
+  };
+
   return (
     <>
       <View style={style.mainContainer}>
@@ -96,20 +115,20 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
                 <View style={{ width: "40%" }}>
                   <RoundButton
                     buttonStyle={style.signButton}
-                    label={constants.labelConfirm}
+                    label={constants.labelMessage}
                     buttonColor={theme.appColor}
                     labelStyle={theme.highlightTextColor}
-                    //  onPress={() => accept(item)}
+                      onPress={() => message(item)}
                   />
                 </View>
 
                 <View style={{ width: "40%" }}>
                   <RoundButton
                     buttonStyle={style.signButton}
-                    label={constants.labelReject}
+                    label={constants.labelContact}
                     buttonColor={theme.appColor}
                     labelStyle={theme.highlightTextColor}
-                    onPress={() => reject(item)}
+                    onPress={() => contact(item)}
                     //   //onPress={goToHome}
                   />
                 </View>

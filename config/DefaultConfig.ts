@@ -54,6 +54,8 @@ export interface AppConstants {
   labelSignup: string;
   labelConfirm: string;
   labelReject: string;
+  labelMessage: string;
+  labelContact: string;
   phonePlaceholder: string;
   emailPlaceholder: string;
   userPlaceholder: string;
@@ -158,6 +160,8 @@ export const defaultConfig: ApplicationConfig = {
     labelSignup: "Sign Up",
     labelConfirm: "Confirm",
     labelReject: "Reject",
+    labelMessage : 'Message',
+    labelContact : 'Contact',
     phonePlaceholder: "Phone",
     namePlaceholder: "Name",
     emailPlaceholder: "Email",

@@ -24,6 +24,7 @@ import Message from '../pages/Message';
 import PaymentProcess from '../pages/PaymentProcess';
 import NewCard from '../pages/NewCard';
 import Payment from '../pages/Payment';
+import Chat from '../pages/Chat';
 
 interface Props {
   configReducer: ApplicationConfig
@@ -56,6 +57,7 @@ const Router: React.FunctionComponent<Props> = ({
               <Route exact path="/process/" component={PaymentProcess} />
               <Route exact path="/card/" component={NewCard} />
               <Route exact path="/payment/" component={Payment} />
+              <Route exact path="/chat/" component={Chat} />
             </Switch>
           </BackHandlerHOC>
         </NativeRouter>
