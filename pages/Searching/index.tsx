@@ -1,31 +1,123 @@
-import React from 'react';
-import { RouteComponentProps } from 'react-router-native';
-import { Dispatch } from 'redux';
-import { View, ViewStyle, StyleSheet, TextStyle, Image, ImageStyle, ImageBackground } from 'react-native';
-import { AppConstants, AppTheme } from '../../config/DefaultConfig';
-import ThemedText from '../../components/UI/ThemedText';
-import useConstants from '../../hooks/useConstants';
-import useTheme from '../../hooks/useTheme';
-import FooterNavigation from '../Footer/Index';
+import React, { useState, useEffect } from "react";
+import { RouteComponentProps } from "react-router-native";
+import { Dispatch } from "redux";
+import {
+  View,
+  ViewStyle,
+  StyleSheet,
+  TextStyle,
+  Image,
+  ImageStyle,
+  ImageBackground,
+  FlatList,
+  Text,
+} from "react-native";
+import { AppConstants, AppTheme } from "../../config/DefaultConfig";
+import ThemedText from "../../components/UI/ThemedText";
+import useConstants from "../../hooks/useConstants";
+import useTheme from "../../hooks/useTheme";
+import FooterNavigation from "../Footer/Index";
+import database from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
+import RoundButton from "../../components/Base/RoundButton";
+
+const girlImageUri =
+  "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
 const girl = require("../../images/searching.jpg");
 
 interface Props extends RouteComponentProps {
-  dispatch: Dispatch,
-  history: any
+  dispatch: Dispatch;
+  history: any;
 }
 
-const Searching: React.FunctionComponent<Props> = ({
-  history
-}: Props) => {
+const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
+  const [requests, setAcceptedRequests] = useState([]);
+
+  useEffect(() => {
+    let acceptedArray = [];
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((loggedIn) => {
+        // console.log("snap", loggedIn.val());
+
+        database()
+          .ref("requests")
+          .once("value")
+          .then((dataSnapshot) => {
+            // console.log("snap", dataSnapshot.val());
+            dataSnapshot.forEach((child) => {
+              //   console.log("child", Object.keys(dataSnapshot.val()));
+              if (
+                loggedIn.val().id == child.val().receiverId &&
+                child.val().isAccepted == 1
+              ) {
+                let obj = {};
+                //  console.group("key", child.key);
+                //  child.val().requestKey = "test";
+                obj.key = child.val();
+                obj.requestKey = child.key;
+                // console.group("obj", obj);
+                acceptedArray.push(obj);
+              }
+            });
+
+            console.log("requests", acceptedArray);
+            // setRequests(requestsArray);
+            setAcceptedRequests(acceptedArray);
+
+            // setImage(dataSnapshot.val().image);
+          });
+      });
+  }, []);
 
   return (
     <>
       <View style={style.mainContainer}>
+        <FlatList
+          data={requests}
+          renderItem={({ item }) => (
+            <View>
+              <Image
+                source={{ uri: item ? item.key.senderImage : girlImageUri }}
+                style={style.imageStyle}
+              />
+              <Text>{item.key.senderName}</Text>
+              {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+              <View
+                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              >
+                <View style={{ width: "40%" }}>
+                  <RoundButton
+                    buttonStyle={style.signButton}
+                    label={constants.labelConfirm}
+                    buttonColor={theme.appColor}
+                    labelStyle={theme.highlightTextColor}
+                    //  onPress={() => accept(item)}
+                  />
+                </View>
+
+                <View style={{ width: "40%" }}>
+                  <RoundButton
+                    buttonStyle={style.signButton}
+                    label={constants.labelReject}
+                    buttonColor={theme.appColor}
+                    labelStyle={theme.highlightTextColor}
+                    onPress={() => reject(item)}
+                    //   //onPress={goToHome}
+                  />
+                </View>
+              </View>
+            </View>
+          )}
+        />
+        {/*
         <ImageBackground source={ImagePath} style={style.imageStyle} >
           <View style={[style.topContainer, style.nexStyle]}>
             <ThemedText styleKey="highlightTextColor" style={[style.textStyle, style.specialText]}>{constants.searching}</ThemedText>
@@ -45,10 +137,11 @@ const Searching: React.FunctionComponent<Props> = ({
             </View>
           </View>
         </ImageBackground>
-        <FooterNavigation history={history} />    
+        <FooterNavigation history={history} />  
+        */}
       </View>
     </>
-  )
+  );
 };
 
 export default Searching;
@@ -78,88 +171,90 @@ const style: Style = StyleSheet.create<Style>({
     paddingLeft: 35,
     paddingRight: 35,
     fontSize: 16,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     justifyContent: "center",
-    alignItems: 'center',
+    alignItems: "center",
   },
   mainContainer: {
-    flex: 1, 
-    flexDirection:'column'
+    flex: 1,
+    flexDirection: "column",
   },
   topContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: 'center',
+    alignItems: "center",
     paddingLeft: 10,
     paddingRight: 10,
     marginTop: 80,
   },
-  bottomContainer: { 
-    flex: 1, 
-    alignItems: 'flex-start', 
-    flexDirection: 'row'
+  bottomContainer: {
+    flex: 1,
+    alignItems: "flex-start",
+    flexDirection: "row",
   },
   childContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
   },
   forgotPassword: {
     marginBottom: 15,
     fontSize: 22,
-    alignSelf: 'flex-start',
-    alignContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignSelf: "flex-start",
+    alignContent: "flex-start",
+    alignItems: "flex-start",
   },
   iconContainer: {
     width: 200,
     height: 200,
     borderRadius: 200,
     marginLeft: 35,
-    backgroundColor: '#fc5660', 
-    justifyContent: 'center',
+    backgroundColor: "#fc5660",
+    justifyContent: "center",
   },
   outerContainer: {
     minWidth: 270,
     height: 270,
     borderRadius: 200,
-    backgroundColor: '#fd9ca5', 
+    backgroundColor: "#fd9ca5",
     marginTop: 55,
     marginBottom: 55,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   logoImage: {
-    justifyContent: 'center',
-    width: 150, 
+    justifyContent: "center",
+    width: 150,
     height: 150,
     marginLeft: 25,
-    borderRadius: 150
+    borderRadius: 150,
   },
   textStyle: {
-    fontSize: 16, 
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: "bold",
   },
   nexStyle: {
-    marginTop: 80, 
+    marginTop: 80,
   },
   specialText: {
-    fontSize: 40, 
+    fontSize: 40,
   },
   imageStyle: {
-    width: '100%', 
-    height: '100%',
+    width: "100%",
+    height: 300,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   bottomContent: {
-    flex: 1, 
-    justifyContent: 'flex-start'
+    flex: 1,
+    justifyContent: "flex-start",
   },
   messageContent: {
-    textAlign: "center", 
-    paddingBottom: 20
+    textAlign: "center",
+    paddingBottom: 20,
   },
   extraStyle: {
-    backgroundColor: '#ffbcc3', 
-    borderRadius: 200, 
-    marginLeft: 10, 
-    marginRight: 10
+    backgroundColor: "#ffbcc3",
+    borderRadius: 200,
+    marginLeft: 10,
+    marginRight: 10,
   },
 });

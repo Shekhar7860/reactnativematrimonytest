@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-native';
-import { Dispatch } from 'redux';
-import { View, ViewStyle, StyleSheet, TextStyle, Image, Text, ImageStyle, ImageBackground, TouchableOpacity,  FlatList } from 'react-native';
-import { AppConstants, AppTheme } from '../../config/DefaultConfig';
-import ThemedText from '../../components/UI/ThemedText';
-import useConstants from '../../hooks/useConstants';
-import useTheme from '../../hooks/useTheme';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import FooterNavigation from '../Footer/Index';
+import React, { useEffect, useState } from "react";
+import { RouteComponentProps } from "react-router-native";
+import { Dispatch } from "redux";
+import {
+  View,
+  ViewStyle,
+  StyleSheet,
+  TextStyle,
+  Image,
+  Text,
+  ImageStyle,
+  ImageBackground,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { AppConstants, AppTheme } from "../../config/DefaultConfig";
+import ThemedText from "../../components/UI/ThemedText";
+import useConstants from "../../hooks/useConstants";
+import useTheme from "../../hooks/useTheme";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import FooterNavigation from "../Footer/Index";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import RoundButton from "../../components/Base/RoundButton";
@@ -20,99 +31,114 @@ const profile2 = require("../../images/new-profile.jpg");
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 interface Props extends RouteComponentProps {
-  dispatch: Dispatch,
-  history: any
+  dispatch: Dispatch;
+  history: any;
 }
 
-const Nearby: React.FunctionComponent<Props> = ({
-  history
-}: Props) => {
+const Nearby: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
   const [requests, setRequests] = useState([]);
 
   const backButton = () => {
-    history.push('/matching')
-  }
+    history.push("/matching");
+  };
   useEffect(() => {
     let requestsArray = [];
     database()
-    .ref("user")
-    .child(auth().currentUser.uid)
-    .once("value")
-    .then((loggedIn) => {
-      // console.log("snap", loggedIn.val());
-      
-    
-      database()
-        .ref("requests")
-        .once("value")
-        .then((dataSnapshot) => {
-         // console.log("snap", dataSnapshot.val());
-          dataSnapshot.forEach((child) => {
-           console.log('child', Object.keys( dataSnapshot.val()))
-           if(loggedIn.val().id == child.val().receiverId){
-          //  child.key = Object.keys(dataSnapshot.val())[0]
-            requestsArray.push(child)
-           }
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((loggedIn) => {
+        // console.log("snap", loggedIn.val());
+
+        database()
+          .ref("requests")
+          .once("value")
+          .then((dataSnapshot) => {
+            // console.log("snap", dataSnapshot.val());
+            dataSnapshot.forEach((child) => {
+              //   console.log("child", Object.keys(dataSnapshot.val()));
+              if (
+                loggedIn.val().id == child.val().receiverId &&
+                child.val().isAccepted == 0
+              ) {
+                let obj = {};
+                //  console.group("key", child.key);
+                //  child.val().requestKey = "test";
+                obj.key = child.val();
+                obj.requestKey = child.key;
+                // console.group("obj", obj);
+                requestsArray.push(obj);
+              }
+            });
+
+            // console.log("requests", requestsArray);
+            setRequests(requestsArray);
+
+            // setImage(dataSnapshot.val().image);
           });
-
-       //   console.log('requests', requestsArray)
-          setRequests(requestsArray)
-
-         // setImage(dataSnapshot.val().image);
-        });
       });
-    
   }, []);
 
   const accept = (selected) => {
-   console.log('sel', selected)
-  }
+    console.log("sel", selected);
+
+    database()
+      .ref("/requests")
+      .child(selected.requestKey)
+      .update({
+        isAccepted: 1,
+      });
+  };
 
   const reject = (selected) => {
-    console.log('rej', selected)
-  }
+    database()
+      .ref("/requests")
+      .child(selected.requestKey)
+      .remove();
+  };
 
   return (
     <>
       <View style={style.mainContainer}>
-      <FlatList
-         data={requests}
-         renderItem={({item}) => 
-         <View >
-        
-         <Image
-                    source={{ uri: item ? item.senderImage : girlImageUri }}
-                    style={style.imageStyle}
+        <FlatList
+          data={requests}
+          renderItem={({ item }) => (
+            <View>
+              <Image
+                source={{ uri: item ? item.key.senderImage : girlImageUri }}
+                style={style.imageStyle}
+              />
+              <Text>{item.key.senderName}</Text>
+              {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+              <View
+                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              >
+                <View style={{ width: "40%" }}>
+                  <RoundButton
+                    buttonStyle={style.signButton}
+                    label={constants.labelConfirm}
+                    buttonColor={theme.appColor}
+                    labelStyle={theme.highlightTextColor}
+                    onPress={() => accept(item)}
                   />
-                   <Text>{item.senderName}</Text>
-         {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
-         <View style={{flexDirection : 'row', justifyContent : 'space-around'}}>
-           <View style={{width : '40%'}}>
-           <RoundButton
-              buttonStyle={style.signButton}
-              label={constants.labelConfirm}
-              buttonColor={theme.appColor}
-              labelStyle={theme.highlightTextColor}
-              onPress={ () => accept(item)}
-            />
+                </View>
+
+                <View style={{ width: "40%" }}>
+                  <RoundButton
+                    buttonStyle={style.signButton}
+                    label={constants.labelReject}
+                    buttonColor={theme.appColor}
+                    labelStyle={theme.highlightTextColor}
+                    onPress={() => reject(item)}
+                    //onPress={goToHome}
+                  />
+                </View>
+              </View>
             </View>
-           
-            <View style={{width : '40%'}}>
-             <RoundButton
-              buttonStyle={style.signButton}
-              label={constants.labelReject}
-              buttonColor={theme.appColor}
-              labelStyle={theme.highlightTextColor}
-              onPress={ () => reject(item)}
-              //onPress={goToHome}
-            />
-            </View>
-            </View>
-         </View>
-        }
-       />
+          )}
+        />
         {/* <ImageBackground source={ImagePath} style={style.imageStyle}>
           <View style={style.backContainer}>
             <TouchableOpacity  onPress={backButton}>
@@ -170,7 +196,7 @@ const Nearby: React.FunctionComponent<Props> = ({
         <FooterNavigation history={history} />     */}
       </View>
     </>
-  )
+  );
 };
 
 export default Nearby;
@@ -199,31 +225,31 @@ const style: Style = StyleSheet.create<Style>({
   container: {
     fontSize: 16,
     justifyContent: "flex-start",
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     borderRadius: 20,
-    marginTop: 40
+    marginTop: 40,
   },
   mainContainer: {
-    flex: 1, 
-    flexDirection:'column'
+    flex: 1,
+    flexDirection: "column",
   },
   leftContainer: {
-    flex: 0, 
+    flex: 0,
     justifyContent: "flex-start",
   },
   rightContainer: {
-    flex: 0, 
-    justifyContent: "flex-end", 
-    paddingRight: 20
+    flex: 0,
+    justifyContent: "flex-end",
+    paddingRight: 20,
   },
   centerContainer: {
-    flex: 3, 
-    justifyContent: "center", 
-    paddingTop: 20
+    flex: 3,
+    justifyContent: "center",
+    paddingTop: 20,
   },
   backContainer: {
-    flexDirection: 'row', 
-    justifyContent: "space-between", 
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   backIcon: {
     fontSize: 25,
@@ -231,7 +257,7 @@ const style: Style = StyleSheet.create<Style>({
     paddingLeft: 20,
   },
   childContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
   },
   imageStyle: {
@@ -241,48 +267,48 @@ const style: Style = StyleSheet.create<Style>({
     borderTopRightRadius: 40,
   },
   searchStyle: {
-    justifyContent: 'center',
-    width: 20, 
+    justifyContent: "center",
+    width: 20,
     height: 20,
   },
   textStyle: {
-    fontSize: 24, 
-    fontWeight: 'bold',
-    textAlign: 'center',
-    alignSelf: 'center',
-    paddingTop: 10
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    alignSelf: "center",
+    paddingTop: 10,
   },
   smallStyle: {
-    fontSize: 14, 
-    textAlign: 'center',
-    alignSelf: 'center',
-    paddingBottom: 15
+    fontSize: 14,
+    textAlign: "center",
+    alignSelf: "center",
+    paddingBottom: 15,
   },
   leftStyle: {
-    fontSize: 20, 
-    textAlign: 'left', 
-    paddingRight: 10, 
-    fontWeight: 'bold'
+    fontSize: 20,
+    textAlign: "left",
+    paddingRight: 10,
+    fontWeight: "bold",
   },
   rightStyle: {
-    fontSize: 20, 
-    textAlign: 'right', 
-    textDecorationLine: "underline", 
-    fontWeight: 'bold', 
-    paddingLeft: 10
+    fontSize: 20,
+    textAlign: "right",
+    textDecorationLine: "underline",
+    fontWeight: "bold",
+    paddingLeft: 10,
   },
   extraStyle: {
-    marginLeft: 30, 
-    marginRight: 30,  
-    borderRadius: 40, 
+    marginLeft: 30,
+    marginRight: 30,
+    borderRadius: 40,
     paddingBottom: 40,
-    height: 200
+    height: 200,
   },
   profileStyle: {
-    width: 180, 
-    height: 220, 
-    borderTopLeftRadius: 20, 
-    borderTopRightRadius: 20
+    width: 180,
+    height: 220,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   signButton: {
     minWidth: 100,
