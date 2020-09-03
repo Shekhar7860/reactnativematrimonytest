@@ -59,6 +59,7 @@ export default function Chat() {
         setReceiverImage(location.state.detail.key.senderImage)   
     }
 
+    console.log('receiverId2', receiverId)
     database()
     .ref("/messages").child(chatID(auth().currentUser.uid, receiverId))
       .once("value")
@@ -93,7 +94,7 @@ export default function Chat() {
       senderImage : image,
     });
     console.log('ajjaj', receiverId)
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
    
   }, [])
 

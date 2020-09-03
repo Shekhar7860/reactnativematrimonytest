@@ -56,7 +56,8 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
               //   console.log("child", Object.keys(dataSnapshot.val()));
               if (
                 loggedIn.val().id == child.val().receiverId &&
-                child.val().isAccepted == 1
+                child.val().isAccepted == 1 ||  loggedIn.val().id == child.val().senderId &&
+                child.val().isAccepted == 1 
               ) {
                 let obj = {};
                 //  console.group("key", child.key);
