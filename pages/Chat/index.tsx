@@ -47,28 +47,36 @@ export default function Chat() {
         },
       },
     ])
-    console.log('receievrid', location.state.detail.key.receiverId, auth().currentUser.uid)
+    console.log('receievrid', location.state.detail.key.receiverId, auth().currentUser.uid);
     if(location.state.detail.key.receiverId !== auth().currentUser.uid){
+      alert('m working')
         setReceiverId(location.state.detail.key.receiverId)
         setReceiverName(location.state.detail.key.receiverName)
         setReceiverImage(location.state.detail.key.receiverImage)
     }
     else {
+     // alert(location.state.detail.key.senderId)
         setReceiverId(location.state.detail.key.senderId)
         setReceiverName(location.state.detail.key.senderName)
         setReceiverImage(location.state.detail.key.senderImage)   
     }
 
+   // alert()
+    checkFirebaseMessages(receiverId)
+     
+  
+   
+  }, [])
+
+  const checkFirebaseMessages = (receiverId) => {
     console.log('receiverId2', receiverId)
     database()
     .ref("/messages").child(chatID(auth().currentUser.uid, receiverId))
       .once("value")
       .then((dataSnapshot) => {
         console.log("this is message", dataSnapshot.val());
-       
       });
-   
-  }, [])
+  }
 
   const chatID = (senderId, receiverId) => {
     const chatterID = senderId;
@@ -82,6 +90,7 @@ export default function Chat() {
 
 
   const onSend = useCallback((messages = []) => {
+    console.log('senderId', auth().currentUser.uid, 'receiverId', receiverId)
     database()
     .ref("/messages").child(chatID(auth().currentUser.uid, receiverId))
     .push({
@@ -93,9 +102,21 @@ export default function Chat() {
       receiverImage : receiverImage,
       senderImage : image,
     });
+    database()
+    .ref("/lastmessages")
+    .child(auth().currentUser.uid)
+    .update({
+      senderId: auth().currentUser.uid,
+      receiverId : receiverId,
+      senderName: name,
+      receiverName:  receiverName,
+      message : messages[0].text,
+      receiverImage : receiverImage,
+      senderImage : image,
+    });
     console.log('ajjaj', receiverId)
      setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-   
+     
   }, [])
 
   return (
