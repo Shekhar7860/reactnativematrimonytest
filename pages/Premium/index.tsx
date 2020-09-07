@@ -1,39 +1,97 @@
-import React from 'react';
-import { RouteComponentProps } from 'react-router-native';
-import { Dispatch } from 'redux';
-import { View, ViewStyle, StyleSheet, TextStyle, TouchableOpacity, Image, ImageStyle, ImageBackground, ScrollView, } from 'react-native';
-import { AppConstants, AppTheme } from '../../config/DefaultConfig';
-import ThemedText from '../../components/UI/ThemedText';
-import useConstants from '../../hooks/useConstants';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import useTheme from '../../hooks/useTheme';
+import React, { useEffect, useState } from "react";
+import { RouteComponentProps } from "react-router-native";
+import { Dispatch } from "redux";
+import {
+  View,
+  ViewStyle,
+  StyleSheet,
+  TextStyle,
+  TouchableOpacity,
+  Image,
+  ImageStyle,
+  ImageBackground,
+  ScrollView,
+  FlatList,
+  Text,
+} from "react-native";
+import { AppConstants, AppTheme } from "../../config/DefaultConfig";
+import ThemedText from "../../components/UI/ThemedText";
+import useConstants from "../../hooks/useConstants";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import useTheme from "../../hooks/useTheme";
+import database from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
+const girlImageUri =
+  "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 
 // @ts-ignore
 const ImagePath = require("../../images/gender.png");
 const forget = require("../../images/premium.png");
 
 interface Props extends RouteComponentProps {
-  dispatch: Dispatch,
-  history: any
+  dispatch: Dispatch;
+  history: any;
 }
 
-const Premium: React.FunctionComponent<Props> = ({
-  history
-}: Props) => {
+const Premium: React.FunctionComponent<Props> = ({ history }: Props) => {
+  const [messages, setMessages] = useState([]);
+
+  const message = (selected) => {
+    console.group("message", selected);
+    history.push({
+      pathname: "/chat",
+      state: { detail: selected },
+    });
+  };
+
+  useEffect(() => {
+    database()
+      .ref("/lastmessages")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        let newdata = dataSnapshot.val();
+        if (dataSnapshot.val()) {
+          let imagesArray = Object.values(newdata);
+          // this.arrayholder = imagesArray;
+          console.group("imagesList", Object.values(dataSnapshot.val()));
+          setMessages(imagesArray);
+        }
+      });
+  }, []);
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
 
   const backButton = () => {
-    history.push('/matching')
-  }
+    history.push("/matching");
+  };
 
   const goToPaymentProcess = () => {
-    history.push('/process')
-  }
+    history.push("/process");
+  };
 
   return (
     <>
       <View style={style.mainContainer}>
+        <FlatList
+          data={messages}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => message(item)} style={style.row}>
+              <View style={{ width: "5%" }} />
+              <View style={{ justifyContent: "center" }}>
+                <Image
+                  source={{ uri: item ? item.receiverImage : girlImageUri }}
+                  style={style.imageStyle}
+                />
+              </View>
+              <View style={{ width: "5%" }} />
+              <View style={{ justifyContent: "center" }}>
+                <Text>{item.message}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+        {/* 
         <ImageBackground source={ImagePath} style={style.imageStyle} >
           <TouchableOpacity style={style.backContainer} onPress={backButton}>
             <View style={style.leftContainer}>
@@ -109,9 +167,10 @@ const Premium: React.FunctionComponent<Props> = ({
           </View>
         </TouchableOpacity>
         </ScrollView>
+        */}
       </View>
     </>
-  )
+  );
 };
 
 export default Premium;
@@ -140,65 +199,72 @@ interface Style {
   nexContainer: ViewStyle;
   listContainer: ViewStyle;
   listStyle: ViewStyle;
+  row: ViewStyle;
 }
 
 const style: Style = StyleSheet.create<Style>({
   mainContainer: {
-    flex: 1, 
-    flexDirection:'column'
+    flex: 1,
+    flexDirection: "column",
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: "#bdc3c7",
   },
   topContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: 'center',
+    alignItems: "center",
     paddingLeft: 10,
     paddingRight: 10,
     marginTop: 80,
     marginBottom: 20,
   },
   backContainer: {
-    flexDirection: 'row', 
-    justifyContent: "space-between", 
-    paddingLeft: 20
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingLeft: 20,
   },
   inputLabel: {
-    minWidth: 270, 
+    minWidth: 270,
     height: 70,
-    marginTop: 0
+    marginTop: 0,
   },
   childContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "center",
   },
   leftContainer: {
-    flex: 0, 
+    flex: 0,
     justifyContent: "flex-start",
   },
   forgotPassword: {
-    fontSize: 26
+    fontSize: 26,
   },
   forgetContainer: {
-    width: 120, 
-    height: 120, 
-    alignContent: 'center', 
-    justifyContent: 'center', 
+    width: 120,
+    height: 120,
+    alignContent: "center",
+    justifyContent: "center",
     borderRadius: 120,
   },
   title: {
-    marginBottom: 70
+    marginBottom: 70,
   },
   iconContainer: {
-    flex: 1, 
-    flexDirection: 'column', 
-    justifyContent: 'center', 
-    alignContent: 'center', 
-    alignItems: 'center'
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
   },
   Icon: {
-    fontSize: 12
+    fontSize: 12,
   },
   iconStyle: {
-    fontSize: 22
+    fontSize: 22,
   },
   backIcon: {
     fontSize: 25,
@@ -206,35 +272,36 @@ const style: Style = StyleSheet.create<Style>({
     paddingLeft: 25,
   },
   logoImage: {
-    justifyContent: 'center',
-    width: 120, 
+    justifyContent: "center",
+    width: 120,
     height: 120,
   },
   textStyle: {
-    fontSize: 16, 
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: "bold",
   },
   extraStyle: {
-    marginTop: 80, 
-    marginBottom: 10
+    marginTop: 80,
+    marginBottom: 10,
   },
   nexStyle: {
-    marginTop: 0, 
-    marginBottom: 30
+    marginTop: 0,
+    marginBottom: 30,
   },
   specialText: {
-    fontSize: 40, 
-    textTransform: 'capitalize'
+    fontSize: 40,
+    textTransform: "capitalize",
   },
   imageStyle: {
-    width: '100%', 
-    height: 350,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   bottomContent: {
-    flex: 1, 
+    flex: 1,
   },
   nexContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 10,
     justifyContent: "center",
     borderRadius: 50,
@@ -244,18 +311,18 @@ const style: Style = StyleSheet.create<Style>({
     marginRight: "auto",
     marginTop: 30,
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   listContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     flex: 1,
     marginLeft: 80,
   },
   listStyle: {
-    width: 15, 
-    marginRight: 30, 
+    width: 15,
+    marginRight: 30,
     borderRadius: 50,
-  }
+  },
 });

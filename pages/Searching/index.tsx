@@ -11,6 +11,7 @@ import {
   ImageBackground,
   FlatList,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
 import ThemedText from "../../components/UI/ThemedText";
@@ -37,9 +38,22 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
   const [requests, setAcceptedRequests] = useState([]);
+  const [image, setImage] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     let acceptedArray = [];
+    if (auth().currentUser !== null) {
+      database()
+        .ref("user")
+        .child(auth().currentUser.uid)
+        .once("value")
+        .then((dataSnapshot) => {
+          console.log("snap", dataSnapshot.val().email);
+          setImage(dataSnapshot.val().image);
+          setName(dataSnapshot.val().username);
+        });
+    }
     database()
       .ref("user")
       .child(auth().currentUser.uid)
@@ -55,9 +69,10 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
             dataSnapshot.forEach((child) => {
               //   console.log("child", Object.keys(dataSnapshot.val()));
               if (
-                loggedIn.val().id == child.val().receiverId &&
-                child.val().isAccepted == 1 ||  loggedIn.val().id == child.val().senderId &&
-                child.val().isAccepted == 1 
+                (loggedIn.val().id == child.val().receiverId &&
+                  child.val().isAccepted == 1) ||
+                (loggedIn.val().id == child.val().senderId &&
+                  child.val().isAccepted == 1)
               ) {
                 let obj = {};
                 //  console.group("key", child.key);
@@ -79,10 +94,12 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
   }, []);
 
   const message = (selected) => {
+    console.group("message", selected);
+
     history.push({
-      pathname: '/chat',
-      state: { detail: selected }
-  });
+      pathname: "/chat",
+      state: { detail: selected },
+    });
     // database()
     //   .ref("/requests")
     //   .child(selected.requestKey)
@@ -106,11 +123,29 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
           data={requests}
           renderItem={({ item }) => (
             <View>
-              <Image
-                source={{ uri: item ? item.key.senderImage : girlImageUri }}
-                style={style.imageStyle}
-              />
-              <Text>{item.key.senderName}</Text>
+              <TouchableOpacity style={style.row}>
+                <View style={{ width: "5%" }} />
+                <View style={{ justifyContent: "center" }}>
+                  <Image
+                    source={{
+                      uri:
+                        item.key.senderImage == image
+                          ? item.key.receiverImage
+                          : item.key.senderImage,
+                    }}
+                    style={style.imageStyle}
+                  />
+                </View>
+                <View style={{ width: "5%" }} />
+                <View style={{ justifyContent: "center" }}>
+                  <Text>
+                    {item.key.senderName == name
+                      ? item.key.receiverName
+                      : item.key.senderName}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
               {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
               <View
                 style={{ flexDirection: "row", justifyContent: "space-around" }}
@@ -121,7 +156,7 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
                     label={constants.labelMessage}
                     buttonColor={theme.appColor}
                     labelStyle={theme.highlightTextColor}
-                      onPress={() => message(item)}
+                    onPress={() => message(item)}
                   />
                 </View>
 
@@ -185,6 +220,7 @@ interface Style {
   imageStyle: ImageStyle;
   bottomContent: ViewStyle;
   extraStyle: ViewStyle;
+  row: ViewStyle;
 }
 
 const style: Style = StyleSheet.create<Style>({
@@ -260,10 +296,9 @@ const style: Style = StyleSheet.create<Style>({
     fontSize: 40,
   },
   imageStyle: {
-    width: "100%",
-    height: 300,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   bottomContent: {
     flex: 1,
@@ -278,5 +313,11 @@ const style: Style = StyleSheet.create<Style>({
     borderRadius: 200,
     marginLeft: 10,
     marginRight: 10,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: "#bdc3c7",
   },
 });

@@ -1,83 +1,81 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { useLocation } from "react-router-dom";
-import { GiftedChat } from 'react-native-gifted-chat';
+import React, { useState, useCallback, useEffect } from "react";
+
+import { GiftedChat } from "react-native-gifted-chat";
 import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 
-export default function Chat() {
-    const girlImageUri =
-  "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
+export default function Chat(props) {
+  const girlImageUri =
+    "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
   const [messages, setMessages] = useState([]);
-  const location = useLocation();
+  // const location = useLocation();
   const [receiverId, setReceiverId] = useState("");
   const [receiverName, setReceiverName] = useState("");
   const [receiverImage, setReceiverImage] = useState("");
   const [image, setImage] = useState(girlImageUri);
   const [name, setName] = useState("");
-  
 
   useEffect(() => {
-    //  console.log('currentUser', auth().currentUser._user)
-    console.log('data', location.state.detail);
+    // alert("hiiiii");
+    console.group("data", props.location.state.detail);
     if (auth().currentUser !== null) {
-        console.log(
-          "logged In User" +
-            JSON.stringify(auth().currentUser.providerData[0].email)
-        );
-        database()
-          .ref("user")
-          .child(auth().currentUser.uid)
-          .once("value")
-          .then((dataSnapshot) => {
-            console.log("snap", dataSnapshot.val().email);
-            setImage(dataSnapshot.val().image);
-            setName(dataSnapshot.val().username);
-          });
+      database()
+        .ref("user")
+        .child(auth().currentUser.uid)
+        .once("value")
+        .then((dataSnapshot) => {
+          console.log("snap", dataSnapshot.val().email);
+          setImage(dataSnapshot.val().image);
+          setName(dataSnapshot.val().username);
+        });
+    }
+
+    if (props.location.state.detail.key !== undefined) {
+      if (
+        props.location.state.detail.key.receiverId !== auth().currentUser.uid
+      ) {
+        // alert("m working");
+        setReceiverId(props.location.state.detail.key.receiverId);
+        setReceiverName(props.location.state.detail.key.receiverName);
+        setReceiverImage(props.location.state.detail.key.receiverImage);
+      } else {
+        alert(props.location.state.detail.key.senderId);
+        setReceiverId(props.location.state.detail.key.senderId);
+        setReceiverName(props.location.state.detail.key.senderName);
+        setReceiverImage(props.location.state.detail.key.senderImage);
       }
-
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-    ])
-    console.log('receievrid', location.state.detail.key.receiverId, auth().currentUser.uid);
-    if(location.state.detail.key.receiverId !== auth().currentUser.uid){
-      alert('m working')
-        setReceiverId(location.state.detail.key.receiverId)
-        setReceiverName(location.state.detail.key.receiverName)
-        setReceiverImage(location.state.detail.key.receiverImage)
-    }
-    else {
-     // alert(location.state.detail.key.senderId)
-        setReceiverId(location.state.detail.key.senderId)
-        setReceiverName(location.state.detail.key.senderName)
-        setReceiverImage(location.state.detail.key.senderImage)   
+    } else {
+      if (props.location.state.detail.receiverId !== auth().currentUser.uid) {
+        // alert("m working");
+        setReceiverId(props.location.state.detail.receiverId);
+        setReceiverName(props.location.state.detail.receiverName);
+        setReceiverImage(props.location.state.detail.receiverImage);
+      } else {
+        alert(props.location.state.detail.senderId);
+        setReceiverId(props.location.state.detail.senderId);
+        setReceiverName(props.location.state.detail.senderName);
+        setReceiverImage(props.location.state.detail.senderImage);
+      }
     }
 
-   // alert()
-    checkFirebaseMessages(receiverId)
-     
-  
-   
-  }, [])
+    // alert()
+    checkFirebaseMessages(receiverId);
+  }, []);
 
-  const checkFirebaseMessages = (receiverId) => {
-    console.log('receiverId2', receiverId)
+  useEffect(() => {
+    console.group("receiverId2", receiverId);
+
     database()
-    .ref("/messages").child(chatID(auth().currentUser.uid, receiverId))
+      .ref("/messages")
+      .child(chatID(auth().currentUser.uid, receiverId))
       .once("value")
       .then((dataSnapshot) => {
-        console.log("this is message", dataSnapshot.val());
+        console.group("this is message", dataSnapshot.val());
+        setMessages(Object.values(dataSnapshot.val()));
       });
-  }
+  }, [receiverId]);
 
+  const checkFirebaseMessages = (receiverId) => {};
   const chatID = (senderId, receiverId) => {
     const chatterID = senderId;
     const chateeID = receiverId;
@@ -85,47 +83,59 @@ export default function Chat() {
     chatIDpre.push(chatterID);
     chatIDpre.push(chateeID);
     chatIDpre.sort();
-    return chatIDpre.join('_');
+    return chatIDpre.join("_");
   };
 
+  const onSend = (messages) => {
+    console.group(
+      "senderId",
+      auth().currentUser.uid,
+      "receiverId",
+      receiverId,
+      messages
+    );
+    database()
+      .ref("/messages")
+      .child(chatID(auth().currentUser.uid, receiverId))
+      .push({
+        senderId: auth().currentUser.uid,
+        receiverId: receiverId,
+        senderName: name,
+        receiverName: receiverName,
+        text: messages[0].text,
+        receiverImage: receiverImage,
+        senderImage: image,
+      });
+    database()
+      .ref("/lastmessages")
+      .child(chatID(auth().currentUser.uid, receiverId))
+      .update({
+        senderId: auth().currentUser.uid,
+        receiverId: receiverId,
+        senderName: name,
+        receiverName: receiverName,
+        message: messages[0].text,
+        receiverImage: receiverImage,
+        senderImage: image,
+      });
 
-  const onSend = useCallback((messages = []) => {
-    console.log('senderId', auth().currentUser.uid, 'receiverId', receiverId)
     database()
-    .ref("/messages").child(chatID(auth().currentUser.uid, receiverId))
-    .push({
-      senderId: auth().currentUser.uid,
-      receiverId : receiverId,
-      senderName: name,
-      receiverName:  receiverName,
-      message : messages[0].text,
-      receiverImage : receiverImage,
-      senderImage : image,
-    });
-    database()
-    .ref("/lastmessages")
-    .child(auth().currentUser.uid)
-    .update({
-      senderId: auth().currentUser.uid,
-      receiverId : receiverId,
-      senderName: name,
-      receiverName:  receiverName,
-      message : messages[0].text,
-      receiverImage : receiverImage,
-      senderImage : image,
-    });
-    console.log('ajjaj', receiverId)
-     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-     
-  }, [])
+      .ref("/messages")
+      .child(chatID(auth().currentUser.uid, receiverId))
+      .once("value")
+      .then((dataSnapshot) => {
+        console.group("this is message", dataSnapshot.val());
+        setMessages(Object.values(dataSnapshot.val()));
+      });
+  };
 
   return (
     <GiftedChat
       messages={messages}
-      onSend={messages => onSend(messages)}
+      onSend={(messages) => onSend(messages)}
       user={{
         _id: 1,
       }}
     />
-  )
+  );
 }

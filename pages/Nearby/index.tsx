@@ -106,11 +106,19 @@ const Nearby: React.FunctionComponent<Props> = ({ history }: Props) => {
           data={requests}
           renderItem={({ item }) => (
             <View>
-              <Image
-                source={{ uri: item ? item.key.senderImage : girlImageUri }}
-                style={style.imageStyle}
-              />
-              <Text>{item.key.senderName}</Text>
+              <TouchableOpacity style={style.row}>
+                <View style={{ width: "5%" }} />
+                <View style={{ justifyContent: "center" }}>
+                  <Image
+                    source={{ uri: item ? item.key.senderImage : girlImageUri }}
+                    style={style.imageStyle}
+                  />
+                </View>
+                <View style={{ width: "5%" }} />
+                <View style={{ justifyContent: "center" }}>
+                  <Text>{item.key.senderName}</Text>
+                </View>
+              </TouchableOpacity>
               {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
               <View
                 style={{ flexDirection: "row", justifyContent: "space-around" }}
@@ -219,6 +227,7 @@ interface Style {
   extraStyle: ViewStyle;
   profileStyle: ImageStyle;
   signButton: ViewStyle;
+  row: ViewStyle;
 }
 
 const style: Style = StyleSheet.create<Style>({
@@ -261,10 +270,9 @@ const style: Style = StyleSheet.create<Style>({
     justifyContent: "center",
   },
   imageStyle: {
-    width: "100%",
-    height: 300,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   searchStyle: {
     justifyContent: "center",
@@ -313,5 +321,11 @@ const style: Style = StyleSheet.create<Style>({
   signButton: {
     minWidth: 100,
     marginTop: 30,
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: "#bdc3c7",
   },
 });
