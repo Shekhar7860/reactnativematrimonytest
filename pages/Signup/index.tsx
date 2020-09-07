@@ -31,6 +31,7 @@ import ImagePicker from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
 import RNFetchBlob from "react-native-fetch-blob";
 import auth from "@react-native-firebase/auth";
+import Spinner from "react-native-loading-spinner-overlay";
 
 interface LoginField {
   username?: string;
@@ -117,6 +118,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
   const [imageRef, setImageRef] = useState("");
   const [gender, setGender] = useState("male");
   const [color, setColor] = useState("#7f8c8d");
+  const [visible, setLoader] = useState(false);
 
   const backButton = () => {
     history.push("/");
@@ -296,6 +298,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
 
   const profilePicApi = (image, props) => {};
   const goToHome = () => {
+    setLoader(true);
     const errors: ValidationError = validate({
       username: username,
       email: email,
@@ -309,7 +312,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
             console.group("res", res.user._user.uid);
-
+            setLoader(false);
+            history.push("/gender/");
             database()
               .ref("/user")
               .child(res.user._user.uid)
@@ -332,6 +336,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 gender: gender,
                 id: res.user._user.uid,
               });
+            setLoader(false);
             // history.push("/gender/");
             // this.props.navigation.navigate('Home')
           })
@@ -351,6 +356,15 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
 
   return (
     <>
+      <Spinner
+        visible={visible}
+        color="#8e44ad"
+        tintColor="#8e44ad"
+        animation={"fade"}
+        cancelable={false}
+        textStyle={{ color: "#FFF" }}
+      />
+
       <View style={style.mainContainer}>
         <ScrollView>
           <ImageBackground source={ImagePath} style={style.imageStyle}>

@@ -25,6 +25,7 @@ import { ValidationError } from "../../config/validation";
 import Input from "../../components/Base/Input";
 import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
+import Spinner from "react-native-loading-spinner-overlay";
 
 interface LoginField {
   username?: string;
@@ -42,6 +43,7 @@ interface Props extends RouteComponentProps {
 const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
+  const [visible, setLoader] = useState(false);
 
   const validate = (data: LoginField): ValidationError => {
     const errors = microValidator.validate(
@@ -77,6 +79,7 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   const goToHome = () => {
+    setLoader(true);
     const errors: ValidationError = validate({
       username: username,
       password: password,
@@ -87,6 +90,8 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
         auth()
           .signInWithEmailAndPassword(username, password)
           .then((res) => {
+            setLoader(false);
+
             history.push("/gender/");
             // this.props.navigation.navigate('Home')
           })
@@ -94,9 +99,11 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
             Alert.alert(error.toString());
           });
       } catch (error) {
+        setLoader(false);
         Alert.alert(error.toString(error));
       }
     } else {
+      setLoader(false);
       setErrors(errors);
     }
   };
@@ -111,6 +118,14 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
 
   return (
     <View style={style.mainContainer}>
+      <Spinner
+        visible={visible}
+        color="#8e44ad"
+        tintColor="#8e44ad"
+        animation={"fade"}
+        cancelable={false}
+        textStyle={{ color: "#FFF" }}
+      />
       <ScrollView>
         <ImageBackground
           source={ImagePath}
