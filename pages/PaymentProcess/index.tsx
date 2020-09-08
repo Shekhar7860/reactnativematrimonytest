@@ -9,6 +9,7 @@ import RoundButton from '../../components/Base/RoundButton';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useTheme from '../../hooks/useTheme';
+import AddSubscriptionView from '../../components/AddSubscriptionView';
 
 // @ts-ignore
 const ImagePath = require("../../images/profile.png");
@@ -28,6 +29,12 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
 }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const STRIPE_ERROR = 'Payment service error. Try again later.';
+const SERVER_ERROR = 'Server error. Try again later.';
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_V6QVAPwpYaxrXhmh9y2l6qiX';
 
   const backButton = () => {
     history.push('/premium')
@@ -41,9 +48,110 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
     history.push('/payment')
   }
 
+  const getCreditCardToken = (creditCardData) => {
+    const card = {
+      'card[number]': creditCardData.values.number.replace(/ /g, ''),
+      'card[exp_month]': creditCardData.values.expiry.split('/')[0],
+      'card[exp_year]': creditCardData.values.expiry.split('/')[1],
+      'card[cvc]': creditCardData.values.cvc
+    };
+  
+    return fetch('https://api.stripe.com/v1/tokens', {
+      headers: {
+        // Use the correct MIME type for your server
+        Accept: 'application/json',
+        // Use the correct Content Type to send data in request body
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // Use the Stripe publishable key as Bearer
+        Authorization: `Bearer ${STRIPE_PUBLISHABLE_KEY}`
+      },
+      // Use a proper HTTP method
+      method: 'post',
+      // Format the credit card data to a string of key-value pairs
+      // divided by &
+      body: Object.keys(card)
+        .map(key => key + '=' + card[key])
+        .join('&')
+    }).then(response => response.json());
+  };
+
+ const makePayment = async (token) => {
+   console.log('token', token)
+    fetch('https://us-central1-matrimonytest-3e52f.cloudfunctions.net/payWithStripe', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: 100,
+        currency: "usd",
+        token: token
+      }),
+    })
+      .then((response) => console.log('res', response))
+      .catch((error) => {
+        console.error('error', error);
+      });;
+  }
+  const subscribeUser = (creditCardToken) => {
+    return new Promise((resolve) => {
+      console.log('Credit card token\n', creditCardToken);
+      setTimeout(() => {
+        resolve({ status: true });
+      }, 1000)
+    });
+  };
+  const onSubmit = async (creditCardInput) => {
+    console.log('working')
+ 
+    // Disable the Submit button after the request is sent
+    setSubmitted(true);
+    let creditCardToken;
+
+    try {
+      // Create a credit card token
+      creditCardToken = await getCreditCardToken(creditCardInput);
+      console.log('token', creditCardToken);
+      setToken(creditCardToken.id);
+      makePayment(creditCardToken.id);
+      if (creditCardToken.error) {
+        // Reset the state if Stripe responds with an error
+        // Set submitted to false to let the user subscribe again
+        setSubmitted(false);
+        setError(STRIPE_ERROR);
+        return;
+      }
+    } catch (e) {
+      // Reset the state if the request was sent with an error
+      // Set submitted to false to let the user subscribe again
+      this.setState({ submitted: false, error: STRIPE_ERROR });
+      return;
+    }
+
+    // Send a request to your server with the received credit card token
+    const { error } = await subscribeUser(creditCardToken);
+    // Handle any errors from your server
+    if (error) {
+      setSubmitted(false);
+      setError(SERVER_ERROR);
+      //this.setState({ submitted: false, error: SERVER_ERROR });
+    } else {
+      setSubmitted(false);
+      setError(null);
+      // this.setState({ submitted: false, error: null });
+    //  navigation.navigate('Home')
+    }
+  };
+
   return (
     <View style={style.mainContainer}>
-      <ImageBackground source={ImagePath} style={style.imageStyle} >
+      <AddSubscriptionView
+    error={error}
+    submitted={submitted}
+    onSubmit={onSubmit}
+  />
+      {/* <ImageBackground source={ImagePath} style={style.imageStyle} >
         <View style={style.backContainer}>
           <TouchableOpacity onPress={backButton}>
             <View style={style.leftContainer}>
@@ -111,7 +219,7 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
         </View>
       </TouchableOpacity>
       <RoundButton buttonStyle={style.inputLabel} label="Pay" buttonColor={theme.appColor} labelStyle={theme.highlightTextColor} onPress={goToPayment}/>
-      </ScrollView>
+      </ScrollView> */}
     </View>
   )
 };
