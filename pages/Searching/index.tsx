@@ -21,8 +21,8 @@ import FooterNavigation from "../Footer/Index";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import RoundButton from "../../components/Base/RoundButton";
-import AddSubscriptionView from '../../components/AddSubscriptionView';
-import  {RNUpiPayment} from 'react-native-upi-payment';
+import AddSubscriptionView from "../../components/AddSubscriptionView";
+import { RNUpiPayment } from "react-native-upi-payment";
 
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
@@ -42,7 +42,6 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
   const [requests, setAcceptedRequests] = useState([]);
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
-
 
   useEffect(() => {
     let acceptedArray = [];
@@ -111,24 +110,23 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
     //   });
   };
 
+  const successCallback = (res) => {
+    console.log("res", res);
+  };
 
-const successCallback = (res) => {
-console.log('res', res)
-}
-
-const failureCallback = (err) => {
-  console.log('res', err)
-}
+  const failureCallback = (err) => {
+    console.log("res", err);
+  };
 
   const contact = (selected) => {
-    RNUpiPayment.initializePayment({
+    /* RNUpiPayment.initializePayment({
       vpa: '9646407363@ybl', // or can be john@ybl or mobileNo@upi
       payeeName: 'John Doe',
       amount: '1',
       transactionRef: 'aasf-332-aoei-fn'
-    }, successCallback, failureCallback);
+    }, successCallback, failureCallback); */
 
-   // history.push('/process/')
+    history.push("/process/");
     // database()
     //   .ref("/requests")
     //   .child(selected.requestKey)
