@@ -39,7 +39,7 @@ export default function Chat(props) {
         setReceiverName(props.location.state.detail.key.receiverName);
         setReceiverImage(props.location.state.detail.key.receiverImage);
       } else {
-        alert(props.location.state.detail.key.senderId);
+        // alert(props.location.state.detail.key.senderId);
         setReceiverId(props.location.state.detail.key.senderId);
         setReceiverName(props.location.state.detail.key.senderName);
         setReceiverImage(props.location.state.detail.key.senderImage);
@@ -70,11 +70,21 @@ export default function Chat(props) {
       .child(chatID(auth().currentUser.uid, receiverId))
       .once("value")
       .then((dataSnapshot) => {
-        console.log("this is message", dataSnapshot.val());
-       
         setMessages(Object.values(dataSnapshot.val()));
       });
   }, [receiverId]);
+
+  useEffect(() => {
+    console.log("receiverId2", receiverId);
+
+    database()
+      .ref("/messages")
+      .child(chatID(auth().currentUser.uid, receiverId))
+      .once("value")
+      .then((dataSnapshot) => {
+        setMessages(Object.values(dataSnapshot.val()));
+      });
+  }, [messages]);
 
   const checkFirebaseMessages = (receiverId) => {};
   const chatID = (senderId, receiverId) => {
