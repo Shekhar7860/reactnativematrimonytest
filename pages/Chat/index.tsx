@@ -17,7 +17,7 @@ export default function Chat(props) {
 
   useEffect(() => {
     // alert("hiiiii");
-    console.group("data", props.location.state.detail);
+    console.log("data", props.location.state.detail);
     if (auth().currentUser !== null) {
       database()
         .ref("user")
@@ -63,14 +63,15 @@ export default function Chat(props) {
   }, []);
 
   useEffect(() => {
-    console.group("receiverId2", receiverId);
+    console.log("receiverId2", receiverId);
 
     database()
       .ref("/messages")
       .child(chatID(auth().currentUser.uid, receiverId))
       .once("value")
       .then((dataSnapshot) => {
-        console.group("this is message", dataSnapshot.val());
+        console.log("this is message", dataSnapshot.val());
+       
         setMessages(Object.values(dataSnapshot.val()));
       });
   }, [receiverId]);
@@ -87,7 +88,7 @@ export default function Chat(props) {
   };
 
   const onSend = (messages) => {
-    console.group(
+    console.log(
       "senderId",
       auth().currentUser.uid,
       "receiverId",
@@ -98,6 +99,7 @@ export default function Chat(props) {
       .ref("/messages")
       .child(chatID(auth().currentUser.uid, receiverId))
       .push({
+        _id : auth().currentUser.uid,
         senderId: auth().currentUser.uid,
         receiverId: receiverId,
         senderName: name,
@@ -105,11 +107,17 @@ export default function Chat(props) {
         text: messages[0].text,
         receiverImage: receiverImage,
         senderImage: image,
+        user: {
+          _id: auth().currentUser.uid,
+          name:  name,
+          avatar: image,
+        },
       });
     database()
       .ref("/lastmessages")
       .child(chatID(auth().currentUser.uid, receiverId))
       .update({
+        _id : auth().currentUser.uid,
         senderId: auth().currentUser.uid,
         receiverId: receiverId,
         senderName: name,
@@ -117,6 +125,11 @@ export default function Chat(props) {
         message: messages[0].text,
         receiverImage: receiverImage,
         senderImage: image,
+        user: {
+          _id: auth().currentUser.uid,
+          name:  name,
+          avatar: image,
+        },
       });
 
     database()
@@ -128,13 +141,12 @@ export default function Chat(props) {
         setMessages(Object.values(dataSnapshot.val()));
       });
   };
-
   return (
     <GiftedChat
       messages={messages}
       onSend={(messages) => onSend(messages)}
       user={{
-        _id: 1,
+        _id: auth().currentUser.uid,
       }}
     />
   );
