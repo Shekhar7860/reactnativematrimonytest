@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState} from 'react';
 import { ViewStyle, StyleSheet } from 'react-native';
 import { NativeRouter, Route, Switch } from "react-router-native";
 import { connect } from "react-redux";
@@ -25,21 +25,42 @@ import PaymentProcess from '../pages/PaymentProcess';
 import NewCard from '../pages/NewCard';
 import Payment from '../pages/Payment';
 import Chat from '../pages/Chat';
+import AsyncStorage from '@react-native-community/async-storage'
 
 interface Props {
   configReducer: ApplicationConfig
 }
 
+
 const Router: React.FunctionComponent<Props> = ({
   configReducer
 }: Props) => {
+
+  const [user, setUser] = useState("")
+
+  useEffect(() => {
+    readData()
+  }, [])
+  
+  const readData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user')
+      if (userData !== null) {
+        var data = JSON.parse(userData);
+        console.log('data is', data)
+        setUser(data)
+      }
+    } catch (e) {
+     console.log('Failed to fetch the data from storage')
+    }
+  }
   return (
     <ConfigContext.Provider value={configReducer}>
       <ThemedView style={style.container}>
         <NativeRouter>
           <BackHandlerHOC>
             <Switch>
-              <Route exact path="/" component={BaseHome} />
+              <Route exact path="/" component={user ? Profile : BaseHome} />
               <Route exact path="/login/" component={Login} />
               <Route exact path="/signup/" component={Signup} />
               <Route exact path="/forget/" component={ForgetPassword} />

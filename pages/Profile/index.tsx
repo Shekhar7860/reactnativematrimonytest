@@ -29,6 +29,8 @@ const chat = require("../../images/message.png");
 const image = require("../../images/images.png");
 const logout = require("../../images/logout.png");
 import database from "@react-native-firebase/database";
+import AsyncStorage from '@react-native-community/async-storage'
+
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 
@@ -74,6 +76,22 @@ const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
   const goToMessage = () => {
     history.push("/message");
   };
+
+  const clearStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      history.push("/login")
+     console.log('Storage successfully cleared!')
+    } catch (e) {
+      console.log('Failed to clear the async storage.')
+    }
+  }
+
+  const goToLogin = () => {
+    auth()
+    .signOut()
+    .then(() => clearStorage());
+  }
 
   return (
     <>
@@ -213,11 +231,11 @@ const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
             <View style={style.leftContainer}>
               <Image source={logout} style={style.iconImage} />
             </View>
-            <View style={style.rightContainer}>
+            <TouchableOpacity style={style.rightContainer}  onPress={goToLogin}>
               <ThemedText styleKey="inputColor" style={style.textStyle}>
                 Sign Out
               </ThemedText>
-            </View>
+            </TouchableOpacity>
           </TouchableOpacity>
         </ScrollView>
         <FooterNavigation history={history} />

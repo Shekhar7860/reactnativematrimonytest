@@ -26,6 +26,7 @@ import Input from "../../components/Base/Input";
 import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import Spinner from "react-native-loading-spinner-overlay";
+import AsyncStorage from '@react-native-community/async-storage'
 
 interface LoginField {
   username?: string;
@@ -84,14 +85,13 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
       username: username,
       password: password,
     });
-
     if (!Object.keys(errors).length) {
       try {
         auth()
           .signInWithEmailAndPassword(username, password)
           .then((res) => {
             setLoader(false);
-
+            saveData(res);
             history.push("/gender/");
             // this.props.navigation.navigate('Home')
           })
@@ -107,6 +107,15 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
       setErrors(errors);
     }
   };
+
+  const saveData = async (res) => {
+    try {
+      await AsyncStorage.setItem('user', JSON.stringify(res))
+      console.log('Data successfully saved')
+    } catch (e) {
+      console.log('Failed to save the data to the storage')
+    }
+  }
 
   const goToForget = () => {
     history.push("/forget");

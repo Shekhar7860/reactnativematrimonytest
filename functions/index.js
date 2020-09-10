@@ -1,17 +1,24 @@
-const functions = require('firebase-functions');
-const stripe = require('stripe')('sk_test_BBpfF82J7gaYc9KtduOXARnf');
+
+const functions = require("firebase-functions");
+const stripe = require("stripe")("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");
 
 exports.payWithStripe = functions.https.onRequest((request, response) => {
-    stripe.charges.create({
-        amount: request.body.amount,
-        currency: request.body.currency,
-        source: request.body.token,
-    }).then((charge) => {
-        console.log('charge', charge)
-            response.send(charge);
-            return charge
-        })
-        .catch(err =>{
-            console.log(err);
-        });
+	// Set your secret key: remember to change this to your live secret key in production
+	// See your keys here: https://dashboard.stripe.com/account/apikeys
+
+	// eslint-disable-next-line promise/catch-or-return
+	stripe.charges
+		.create({
+			amount: request.body.amount,
+			currency: request.body.currency,
+			source: request.body.token,
+		})
+		.then((charge) => {
+			// asynchronously called
+			response.send(charge);
+			return charge;
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 });
