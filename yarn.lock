@@ -5499,6 +5499,11 @@ react-native-upi-payment@^1.0.2:
   resolved "https://registry.yarnpkg.com/react-native-upi-payment/-/react-native-upi-payment-1.0.2.tgz#685972e9e28244c930e1cbaa7c799c993a1bcb05"
   integrity sha512-IytUT08Xl0HYEtcjPU7n8RXjYWJYjT4uHpfbL6MEiC74jl06kh4bG9CqBNqt1HTfkA0OXxiPlgYUmaj99XIeMA==
 
+react-native-upi@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/react-native-upi/-/react-native-upi-1.0.6.tgz#c317d41caaf187555d8ea27a2b583a9047baa027"
+  integrity sha512-/f/YiGcoNQJ0wANaZeIwZN2X2THgSoGGxdB06OdWEWQ3Re3EdHUqCoHag9ICEfwwpMg1k6ZkGmEW/LRgb7tmWQ==
+
 react-native-vector-icons@^6.6.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/react-native-vector-icons/-/react-native-vector-icons-6.7.0.tgz#8871ba52ef8e98878ba7a932847f96b6dfc1c137"

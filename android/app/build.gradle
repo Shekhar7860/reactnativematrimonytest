@@ -182,7 +182,8 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    compile project(':react-native-fetch-blob')  
+    compile project(':react-native-fetch-blob')
+     compile project(':react-native-upi')  
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
