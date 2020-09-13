@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { RouteComponentProps } from "react-router-native";
 import { Dispatch } from "redux";
 import {
@@ -22,6 +22,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import useTheme from "../../hooks/useTheme";
 import AddSubscriptionView from "../../components/AddSubscriptionView";
 import Spinner from "react-native-loading-spinner-overlay";
+import stripe from "react-native-stripe-payments";
 
 // @ts-ignore
 const ImagePath = require("../../images/profile.png");
@@ -45,12 +46,14 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
   const [submitted, setSubmitted] = useState(false);
   const STRIPE_ERROR = "Payment service error. Try again later.";
   const SERVER_ERROR = "Server error. Try again later.";
-  const STRIPE_PUBLISHABLE_KEY = "pk_live_51HPiJtEZUPKtMpfPvMgBv4h7XgL47WBUYKZ3khQpsx7qzrvHKICB5bX9po9XjvzVatmhXngyFxOIfhZctb7qeudC00sR1IViYd";
+  const STRIPE_PUBLISHABLE_KEY =
+    "pk_live_51HPiJtEZUPKtMpfPvMgBv4h7XgL47WBUYKZ3khQpsx7qzrvHKICB5bX9po9XjvzVatmhXngyFxOIfhZctb7qeudC00sR1IViYd";
   const [visible, setLoader] = useState(false);
   const backButton = () => {
     history.push("/premium");
   };
 
+  useEffect(() => {}, []);
   const goToNewCard = () => {
     history.push("/card");
   };
@@ -60,7 +63,7 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
   };
 
   const getCreditCardToken = (creditCardData) => {
-    console.log('creditcarddata', creditCardData);
+    console.log("creditcarddata", creditCardData);
     const card = {
       "card[number]": creditCardData.values.number.replace(/ /g, ""),
       "card[exp_month]": creditCardData.values.expiry.split("/")[0],
@@ -87,9 +90,9 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
     }).then((response) => response.json());
   };
 
-  const makePayment = async (token) => {
-    setLoader(true);
-    console.log("token", token);
+  const makePayment = async (creditCardData) => {
+    // setLoader(true);
+
     fetch(
       "https://us-central1-hallowed-grin-213811.cloudfunctions.net/payWithStripe",
       {
@@ -98,24 +101,31 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          amount: 100,
-          currency: "INR",
-          token: token,
-        }),
       }
     )
       .then((response) => response.json())
       .then((responseJson) => {
-        if(responseJson) {
-        setLoader(false);
-        Alert.alert("Payment Done Successfully")
-        }
+        console.group("id", responseJson);
+        const cardDetails = {
+          number: creditCardData.values.number,
+          expMonth: parseFloat(creditCardData.values.expiry.split("/")[0]),
+          expYear: parseFloat(creditCardData.values.expiry.split("/")[1]),
+          cvc: creditCardData.values.cvc,
+        };
+
+        stripe
+          .confirmPayment(responseJson.id, cardDetails)
+          .then((result) => {
+            alert(JSON.stringify(result));
+            //setLoader(false);
+            // Alert.alert("Payment Done Successfully");
+          })
+          .catch((error) => {
+            console.log("error", error);
+          });
       })
       .catch((error) => {
-        setLoader(false);
-        console.group("error", error);
-        Alert.alert("An Error Occured")
+        console.group("err", error);
       });
   };
   const subscribeUser = (creditCardToken) => {
@@ -134,11 +144,7 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
     let creditCardToken;
 
     try {
-      // Create a credit card token
-      creditCardToken = await getCreditCardToken(creditCardInput);
-      console.log("token", creditCardToken);
-      setToken(creditCardToken.id);
-      makePayment(creditCardToken.id);
+      makePayment(creditCardInput);
       if (creditCardToken.error) {
         // Reset the state if Stripe responds with an error
         // Set submitted to false to let the user subscribe again
@@ -152,25 +158,11 @@ const PaymentProcess: React.FunctionComponent<Props> = ({
       this.setState({ submitted: false, error: STRIPE_ERROR });
       return;
     }
-
-    // Send a request to your server with the received credit card token
-    const { error } = await subscribeUser(creditCardToken);
-    // Handle any errors from your server
-    if (error) {
-      setSubmitted(false);
-      setError(SERVER_ERROR);
-      //this.setState({ submitted: false, error: SERVER_ERROR });
-    } else {
-      setSubmitted(false);
-      setError(null);
-      // this.setState({ submitted: false, error: null });
-      //  navigation.navigate('Home')
-    }
   };
 
   return (
     <View style={style.mainContainer}>
-       <Spinner
+      <Spinner
         visible={visible}
         color="#8e44ad"
         tintColor="#8e44ad"

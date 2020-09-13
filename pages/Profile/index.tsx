@@ -21,6 +21,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import useTheme from "../../hooks/useTheme";
 import FooterNavigation from "../Footer/Index";
 import auth from "@react-native-firebase/auth";
+import RNUpiPayment from "react-native-upi-payment";
 
 // @ts-ignore
 const ImagePath = require("../../images/profile.png");
@@ -29,7 +30,7 @@ const chat = require("../../images/message.png");
 const image = require("../../images/images.png");
 const logout = require("../../images/logout.png");
 import database from "@react-native-firebase/database";
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from "@react-native-community/async-storage";
 
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
@@ -74,24 +75,57 @@ const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   const goToMessage = () => {
-    history.push("/message");
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        if (dataSnapshot.val().premium == false) {
+          RNUpiPayment.initializePayment(
+            {
+              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
+              payeeName: "John Doe",
+              amount: "101",
+              transactionRef: "aasf-332-aoei-fn",
+            },
+            successCallback,
+            failureCallback
+          );
+        } else {
+          history.push("/message");
+        }
+      });
+  };
+
+  const successCallback = (res) => {
+    console.log("res", res);
+    database()
+      .ref("/user")
+      .child(auth().currentUser.uid)
+      .update({
+        premium: true,
+      });
+  };
+
+  const failureCallback = (err) => {
+    console.log("res", err);
   };
 
   const clearStorage = async () => {
     try {
       await AsyncStorage.clear();
-      history.push("/login")
-     console.log('Storage successfully cleared!')
+      history.push("/login");
+      console.log("Storage successfully cleared!");
     } catch (e) {
-      console.log('Failed to clear the async storage.')
+      console.log("Failed to clear the async storage.");
     }
-  }
+  };
 
   const goToLogin = () => {
     auth()
-    .signOut()
-    .then(() => clearStorage());
-  }
+      .signOut()
+      .then(() => clearStorage());
+  };
 
   return (
     <>
@@ -231,7 +265,7 @@ const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
             <View style={style.leftContainer}>
               <Image source={logout} style={style.iconImage} />
             </View>
-            <TouchableOpacity style={style.rightContainer}  onPress={goToLogin}>
+            <TouchableOpacity style={style.rightContainer} onPress={goToLogin}>
               <ThemedText styleKey="inputColor" style={style.textStyle}>
                 Sign Out
               </ThemedText>

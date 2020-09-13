@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
 } from "react-native";
 import { Dispatch } from "redux";
 import { AppTheme, AppConstants } from "../../config/DefaultConfig";
@@ -22,6 +23,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Swiper from "react-native-deck-swiper";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
+import RNUpiPayment from "react-native-upi-payment";
 
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
@@ -40,6 +42,10 @@ interface Props extends RouteComponentProps {
 const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
   const [items, setItems] = useState([]);
   const [user, setUser] = useState({});
+  const [image, setImage] = useState("");
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
 
@@ -48,46 +54,145 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   const goToMatched = () => {
-    history.push("/matched");
-  };
-
-  useEffect(() => {
-    database()
-      .ref("/users")
-      .once("value")
-      .then((dataSnapshot) => {
-        let newdata = dataSnapshot.val();
-        if (dataSnapshot.val()) {
-          let imagesArray = Object.values(newdata);
-          // this.arrayholder = imagesArray;
-          console.log("imagesRaay", imagesArray);
-          setItems(imagesArray);
-        }
-      });
-
     database()
       .ref("user")
       .child(auth().currentUser.uid)
       .once("value")
       .then((dataSnapshot) => {
-        console.log("snap", dataSnapshot.val().email);
+        if (dataSnapshot.val().premium == false) {
+          RNUpiPayment.initializePayment(
+            {
+              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
+              payeeName: "John Doe",
+              amount: "101",
+              transactionRef: "aasf-332-aoei-fn",
+            },
+            successCallback,
+            failureCallback
+          );
+        } else {
+          history.push("/message");
+        }
+      });
+  };
+
+  useEffect(() => {
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        console.group("snap", dataSnapshot.val());
         setUser(dataSnapshot.val());
+        setImage(dataSnapshot.val().image);
+        setName(dataSnapshot.val().name);
+        if (dataSnapshot.val().gender == "male") {
+          database()
+            .ref("/users")
+            .orderByChild("gender")
+            .equalTo("female")
+            .once("value")
+            .then((dataSnapshot) => {
+              let newdata = dataSnapshot.val();
+              if (dataSnapshot.val()) {
+                let imagesArray = Object.values(newdata);
+                // this.arrayholder = imagesArray;
+                console.log("imagesRaay", imagesArray);
+                setItems(imagesArray);
+              }
+            });
+        } else {
+          database()
+            .ref("/users")
+            .orderByChild("gender")
+            .equalTo("male")
+            .once("value")
+            .then((dataSnapshot) => {
+              let newdata = dataSnapshot.val();
+              if (dataSnapshot.val()) {
+                let imagesArray = Object.values(newdata);
+                // this.arrayholder = imagesArray;
+                console.log("imagesRaay", imagesArray);
+                setItems(imagesArray);
+              }
+            });
+        }
       });
   }, []);
 
-  const connect = (item) => {
+  const successCallback = (res) => {
+    console.log("res", res);
     database()
-      .ref("/requests")
-      .push({
-        senderId: user.id,
-        receiverId: item.id,
-        senderName: user.username,
-        receiverName: item.username,
-        senderImage: user.image,
-        receiverImage: item.image,
-        senderEmail: user.email,
-        receiverEmail: item.email,
-        isAccepted : 0
+      .ref("/user")
+      .child(auth().currentUser.uid)
+      .update({
+        premium: true,
+      });
+  };
+
+  const failureCallback = (err) => {
+    console.log("res", err);
+  };
+
+  const contact = (item) => {
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        if (dataSnapshot.val().premium == false) {
+          RNUpiPayment.initializePayment(
+            {
+              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
+              payeeName: "John Doe",
+              amount: "101",
+              transactionRef: "aasf-332-aoei-fn",
+            },
+            successCallback,
+            failureCallback
+          );
+        } else {
+          Alert.alert("contact is " + item.phone);
+        }
+      });
+  };
+
+  const connect = (item) => {
+    let acceptedArray = [];
+    database()
+      .ref("requests")
+      .once("value")
+      .then((dataSnapshot) => {
+        var arr = [];
+        dataSnapshot.forEach((child) => {
+          //  console.group("child", child.val());
+          if (
+            auth().currentUser.uid == child.val().receiverId ||
+            auth().currentUser.uid == child.val().senderId
+          ) {
+            arr.push(1);
+          }
+        });
+
+        // console.group("length", arr.length);
+        if (arr.length == 0) {
+          database()
+            .ref("/requests")
+            .push({
+              senderId: user.id,
+              receiverId: item.id,
+              senderName: user.username,
+              receiverName: item.username,
+              senderImage: user.image,
+              receiverImage: item.image,
+              senderEmail: user.email,
+              receiverEmail: item.email,
+              isAccepted: 0,
+            });
+          Alert.alert("Request Send Successfully");
+        } else {
+          Alert.alert("Already Sent Request");
+        }
       });
   };
   // console.log("item", items);
@@ -125,7 +230,9 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
               return (
                 <View style={style.card}>
                   <Image
-                    source={{ uri: card ? card.image : girlImageUri }}
+                    source={{
+                      uri: image !== card.image ? card.image : girlImageUri,
+                    }}
                     style={style.imageCard}
                   />
                   <ThemedText styleKey="cardTextColor" style={style.text}>
@@ -133,15 +240,19 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
                   </ThemedText>
                   <View style={style.childContainer}>
                     <TouchableOpacity>
-                      <View style={style.cardIcon}>
-                        <MaterialIcon
-                          name="gender-male"
-                          size={15}
-                          color={theme.highlightTextColor}
-                          style={style.Icon}
-                        />
-                      </View>
+                      <TouchableOpacity
+                        style={style.cardContent}
+                        onPress={() => contact(card)}
+                      >
+                        <ThemedText
+                          styleKey="highlightTextColor"
+                          style={{ fontWeight: "bold", textAlign: "center" }}
+                        >
+                          View Contact
+                        </ThemedText>
+                      </TouchableOpacity>
                     </TouchableOpacity>
+
                     <TouchableOpacity>
                       <TouchableOpacity
                         style={style.cardContent}
@@ -151,16 +262,13 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
                           styleKey="highlightTextColor"
                           style={{ fontWeight: "bold", textAlign: "center" }}
                         >
-                          26
+                          Send Interest
                         </ThemedText>
                       </TouchableOpacity>
                     </TouchableOpacity>
                   </View>
-                  <ThemedText
-                    styleKey="cardTextColor"
-                    style={[style.text, style.textStyle]}
-                  >
-                    {card ? card.username : null}
+                  <ThemedText styleKey="cardTextColor" style={style.text}>
+                    {"age"}
                   </ThemedText>
                 </View>
               );
@@ -192,7 +300,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
                   </TouchableOpacity>
                 </View>
                 <View style={style.iconContainer}>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => contact(card)}>
                     <Image source={heart} style={style.logoImage} />
                   </TouchableOpacity>
                 </View>
@@ -354,9 +462,10 @@ const style: Style = StyleSheet.create<Style>({
     paddingLeft: 10,
   },
   cardContent: {
+    justifyContent: "center",
     backgroundColor: "#fc5660",
-    width: 67,
-    height: 23,
+    width: 107,
+    height: 43,
     borderRadius: 20,
     marginTop: 5,
     paddingTop: Platform.OS === "ios" ? 3 : 1,

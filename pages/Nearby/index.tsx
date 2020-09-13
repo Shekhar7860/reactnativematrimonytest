@@ -99,55 +99,89 @@ const Nearby: React.FunctionComponent<Props> = ({ history }: Props) => {
       .remove();
   };
 
+  const goBack = () => {
+    history.push("/matching");
+  };
+
   return (
     <>
+      <View style={style.toolbar}>
+        <TouchableOpacity onPress={() => goBack()}>
+          <Image
+            style={{ width: 30, marginLeft: 5, height: 30 }}
+            source={require("../../images/back.png")}
+          />
+        </TouchableOpacity>
+        <Text style={style.toolbarTitle}>Received Requests</Text>
+        <Text style={style.toolbarButton} />
+      </View>
       <View style={style.mainContainer}>
-        <FlatList
-          data={requests}
-          renderItem={({ item }) => (
-            <View>
-              <TouchableOpacity style={style.row}>
-                <View style={{ width: "5%" }} />
-                <View style={{ justifyContent: "center" }}>
-                  <Image
-                    source={{ uri: item ? item.key.senderImage : girlImageUri }}
-                    style={style.imageStyle}
-                  />
-                </View>
-                <View style={{ width: "5%" }} />
-                <View style={{ justifyContent: "center" }}>
-                  <Text>{item.key.senderName}</Text>
-                </View>
-              </TouchableOpacity>
-              {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
-              <View
-                style={{ flexDirection: "row", justifyContent: "space-around" }}
-              >
-                <View style={{ width: "40%" }}>
-                  <RoundButton
-                    buttonStyle={style.signButton}
-                    label={constants.labelConfirm}
-                    buttonColor={theme.appColor}
-                    labelStyle={theme.highlightTextColor}
-                    onPress={() => accept(item)}
-                  />
-                </View>
+        {requests.length !== 0 ? (
+          <FlatList
+            data={requests}
+            renderItem={({ item }) => (
+              <View>
+                <TouchableOpacity style={style.row}>
+                  <View style={{ width: "5%" }} />
+                  <View style={{ justifyContent: "center" }}>
+                    <Image
+                      source={{
+                        uri: item ? item.key.senderImage : girlImageUri,
+                      }}
+                      style={style.imageStyle}
+                    />
+                  </View>
+                  <View style={{ width: "5%" }} />
+                  <View style={{ justifyContent: "center" }}>
+                    <Text>{item.key.senderName}</Text>
+                  </View>
+                </TouchableOpacity>
+                {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <View style={{ width: "40%" }}>
+                    <RoundButton
+                      buttonStyle={style.signButton}
+                      label={constants.labelConfirm}
+                      buttonColor={theme.appColor}
+                      labelStyle={theme.highlightTextColor}
+                      onPress={() => accept(item)}
+                    />
+                  </View>
 
-                <View style={{ width: "40%" }}>
-                  <RoundButton
-                    buttonStyle={style.signButton}
-                    label={constants.labelReject}
-                    buttonColor={theme.appColor}
-                    labelStyle={theme.highlightTextColor}
-                    onPress={() => reject(item)}
-                    //onPress={goToHome}
-                  />
+                  <View style={{ width: "40%" }}>
+                    <RoundButton
+                      buttonStyle={style.signButton}
+                      label={constants.labelReject}
+                      buttonColor={theme.appColor}
+                      labelStyle={theme.highlightTextColor}
+                      onPress={() => reject(item)}
+                      //onPress={goToHome}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-        />
-        {/* <ImageBackground source={ImagePath} style={style.imageStyle}>
+            )}
+          />
+        ) : (
+          <View style={{ marginTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              No Record Found{" "}
+            </Text>
+          </View>
+        )}
+      </View>
+      {/* <ImageBackground source={ImagePath} style={style.imageStyle}>
           <View style={style.backContainer}>
             <TouchableOpacity  onPress={backButton}>
               <View style={style.leftContainer}>
@@ -202,7 +236,6 @@ const Nearby: React.FunctionComponent<Props> = ({ history }: Props) => {
           </View>
         </ImageBackground>
         <FooterNavigation history={history} />     */}
-      </View>
     </>
   );
 };
@@ -210,6 +243,9 @@ const Nearby: React.FunctionComponent<Props> = ({ history }: Props) => {
 export default Nearby;
 
 interface Style {
+  toolbar: ViewStyle;
+  toolbarButton: ViewStyle;
+  toolbarTitle: ViewStyle;
   container: ViewStyle;
   mainContainer: ViewStyle;
   childContainer: ViewStyle;
@@ -327,5 +363,23 @@ const style: Style = StyleSheet.create<Style>({
     marginBottom: 20,
     borderBottomWidth: 1,
     borderColor: "#bdc3c7",
+  },
+  toolbar: {
+    backgroundColor: "#f39c12",
+    paddingBottom: 10,
+    flexDirection: "row",
+    paddingTop: 20, //Step 1
+  },
+  toolbarButton: {
+    //Step 2
+    color: "#fff",
+    textAlign: "center",
+  },
+  toolbarTitle: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+    flex: 1,
+    fontSize: 20, //Step 3
   },
 });

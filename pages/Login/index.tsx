@@ -26,7 +26,7 @@ import Input from "../../components/Base/Input";
 import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import Spinner from "react-native-loading-spinner-overlay";
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from "@react-native-community/async-storage";
 
 interface LoginField {
   username?: string;
@@ -110,12 +110,12 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
 
   const saveData = async (res) => {
     try {
-      await AsyncStorage.setItem('user', JSON.stringify(res))
-      console.log('Data successfully saved')
+      await AsyncStorage.setItem("user", JSON.stringify(res));
+      console.log("Data successfully saved");
     } catch (e) {
-      console.log('Failed to save the data to the storage')
+      console.log("Failed to save the data to the storage");
     }
-  }
+  };
 
   const goToForget = () => {
     history.push("/forget");
@@ -129,8 +129,8 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
     <View style={style.mainContainer}>
       <Spinner
         visible={visible}
-        color="#8e44ad"
-        tintColor="#8e44ad"
+        color="#f39c12"
+        tintColor="#f39c12"
         animation={"fade"}
         cancelable={false}
         textStyle={{ color: "#FFF" }}
@@ -138,7 +138,7 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
       <ScrollView>
         <ImageBackground
           source={ImagePath}
-          style={{ width: "100%", height: 450 }}
+          style={{ width: "100%", height: 450, tintColor: "green" }}
         >
           <TouchableOpacity style={style.backContainer} onPress={backButton}>
             <View style={style.leftContainer}>
@@ -231,47 +231,6 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
               labelStyle={theme.highlightTextColor}
               onPress={goToSignup}
             />
-            <View style={style.childContainer}>
-              <View
-                style={[
-                  style.iconContainer,
-                  { backgroundColor: theme.facebookColor },
-                ]}
-              >
-                <Icon
-                  name="facebook"
-                  size={30}
-                  color={theme.highlightTextColor}
-                  style={style.Icon}
-                />
-              </View>
-              <View
-                style={[
-                  style.iconContainer,
-                  { backgroundColor: theme.googleColor },
-                ]}
-              >
-                <Icon
-                  name="google"
-                  size={30}
-                  color={theme.highlightTextColor}
-                  style={style.Icon}
-                />
-              </View>
-              <View
-                style={[
-                  style.iconContainer,
-                  { backgroundColor: theme.twitterColor },
-                ]}
-              >
-                <Icon
-                  name="twitter"
-                  size={30}
-                  color={theme.highlightTextColor}
-                  style={style.Icon}
-                />
-              </View>
-            </View>
           </View>
         </View>
       </ScrollView>

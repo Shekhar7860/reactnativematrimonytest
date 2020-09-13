@@ -22,6 +22,7 @@ import FooterNavigation from "../Footer/Index";
 import UserItem from "../../components/Base/UserItem";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
+import RNUpiPayment from "react-native-upi-payment";
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 // @ts-ignore
@@ -131,27 +132,41 @@ const Message: React.FunctionComponent<Props> = ({ history }: Props) => {
               </TouchableOpacity>
             </View>
           </View>
-          <FlatList
-            data={messages}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={style.row}>
-                <UserItem
-                  image={
-                    item.receiverImage == image
-                      ? item.senderImage
-                      : item.receiverImage
-                  }
-                  title={
-                    item.receiverName == name
-                      ? item.senderName
-                      : item.receiverName
-                  }
-                  content={item.message}
-                  onPress={() => message(item)}
-                />
-              </TouchableOpacity>
-            )}
-          />
+          {messages.length !== 0 ? (
+            <FlatList
+              data={messages}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={style.row}>
+                  <UserItem
+                    image={
+                      item.receiverImage == image
+                        ? item.senderImage
+                        : item.receiverImage
+                    }
+                    title={
+                      item.receiverName == name
+                        ? item.senderName
+                        : item.receiverName
+                    }
+                    content={item.message}
+                    onPress={() => message(item)}
+                  />
+                </TouchableOpacity>
+              )}
+            />
+          ) : (
+            <View style={{ marginTop: 20 }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                No Record Found{" "}
+              </Text>
+            </View>
+          )}
           {/* 
 
           <UserItem image={user1} title="John Rhoades" content="Hey How are you ?" />

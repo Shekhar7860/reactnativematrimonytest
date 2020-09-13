@@ -109,6 +109,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   const [username, onChangeUsername] = useState<string>("");
+  const [age, onChangeAge] = useState<string>("");
   const [email, onChangeEmail] = useState<string>("");
   const [phone, onChangePhone] = useState<string>("");
   const [password, onChangePassword] = useState<string>("");
@@ -324,6 +325,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 image: imageRef,
                 gender: gender,
                 id: res.user._user.uid,
+                premium: false,
+                age: age,
               });
 
             database()
@@ -335,6 +338,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 image: imageRef,
                 gender: gender,
                 id: res.user._user.uid,
+                premium: false,
+                age: age,
               });
             setLoader(false);
             // history.push("/gender/");
@@ -358,8 +363,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
     <>
       <Spinner
         visible={visible}
-        color="#8e44ad"
-        tintColor="#8e44ad"
+        color="#f39c12"
+        tintColor="#f39c12"
         animation={"fade"}
         cancelable={false}
         textStyle={{ color: "#FFF" }}
@@ -451,6 +456,12 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 icon="mobile1"
                 choose={true}
               />
+              <Input
+                placeholder={"age"}
+                onChangeText={onChangeAge}
+                icon="user"
+                choose={false}
+              />
               <ThemedText
                 styleKey="textColor"
                 style={{ alignSelf: "flex-start", margin: 10 }}
@@ -526,54 +537,10 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 onPress={goToHome}
               />
               <View style={style.childContainer}>
-                <ThemedText style={style.forgotPassword} styleKey="textColor">
-                  {constants.labelSignupOr}
-                </ThemedText>
+                <ThemedText style={style.forgotPassword} styleKey="textColor" />
               </View>
             </View>
-            <View style={{ position: "relative", bottom: 40 }}>
-              <View style={style.childContainer}>
-                <View
-                  style={[
-                    style.iconContainer,
-                    { backgroundColor: theme.facebookColor },
-                  ]}
-                >
-                  <Icon
-                    name="facebook"
-                    size={30}
-                    color={theme.highlightTextColor}
-                    style={style.Icon}
-                  />
-                </View>
-                <View
-                  style={[
-                    style.iconContainer,
-                    { backgroundColor: theme.googleColor },
-                  ]}
-                >
-                  <Icon
-                    name="google"
-                    size={30}
-                    color={theme.highlightTextColor}
-                    style={style.Icon}
-                  />
-                </View>
-                <View
-                  style={[
-                    style.iconContainer,
-                    { backgroundColor: theme.twitterColor },
-                  ]}
-                >
-                  <Icon
-                    name="twitter"
-                    size={30}
-                    color={theme.highlightTextColor}
-                    style={style.Icon}
-                  />
-                </View>
-              </View>
-            </View>
+            <View style={{ position: "relative", bottom: 40 }} />
           </View>
         </ScrollView>
       </View>

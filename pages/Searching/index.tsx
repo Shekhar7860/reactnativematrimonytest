@@ -22,7 +22,7 @@ import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import RoundButton from "../../components/Base/RoundButton";
 import AddSubscriptionView from "../../components/AddSubscriptionView";
-import { RNUpiPayment } from "react-native-upi-payment";
+import RNUpiPayment from "react-native-upi-payment";
 
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
@@ -102,29 +102,56 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
       pathname: "/chat",
       state: { detail: selected },
     });
-    // database()
-    //   .ref("/requests")
-    //   .child(selected.requestKey)
-    //   .update({
-    //     isAccepted: 1,
-    //   });
   };
 
   const successCallback = (res) => {
     console.log("res", res);
+    database()
+      .ref("/user")
+      .child(auth().currentUser.uid)
+      .update({
+        premium: true,
+      });
   };
 
   const failureCallback = (err) => {
     console.log("res", err);
   };
 
-  const contact = (selected) => {
-    /* RNUpiPayment.initializePayment({
-      vpa: '9646407363@ybl', // or can be john@ybl or mobileNo@upi
-      payeeName: 'John Doe',
-      amount: '1',
-      transactionRef: 'aasf-332-aoei-fn'
-    }, successCallback, failureCallback); */
+  const contact = (item) => {
+    database()
+      .ref("user")
+      .child(auth().currentUser.uid)
+      .once("value")
+      .then((dataSnapshot) => {
+        if (dataSnapshot.val().premium == false) {
+          RNUpiPayment.initializePayment(
+            {
+              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
+              payeeName: "John Doe",
+              amount: "101",
+              transactionRef: "aasf-332-aoei-fn",
+            },
+            successCallback,
+            failureCallback
+          );
+        } else {
+          Alert.alert("contact is " + item.phone);
+        }
+      });
+  };
+
+  const contact2 = (selected) => {
+    // RNUpiPayment.initializePayment(
+    //  {
+    //    vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
+    //    payeeName: "John Doe",
+    //   amount: "101",
+    //    transactionRef: "aasf-332-aoei-fn",
+    // },
+    //    successCallback,
+    //    failureCallback
+    //   );
 
     history.push("/process/");
     // database()
@@ -133,65 +160,109 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
     //   .remove();
   };
 
+  const goBack = () => {
+    history.push("/matching");
+  };
+
   return (
     <>
+      <View style={style.toolbar}>
+        <TouchableOpacity onPress={() => goBack()}>
+          <Image
+            style={{ width: 30, marginLeft: 5, height: 30 }}
+            source={require("../../images/back.png")}
+          />
+        </TouchableOpacity>
+        <Text style={style.toolbarTitle}>Accepted Interests</Text>
+        <Text style={style.toolbarButton} />
+      </View>
       <View style={style.mainContainer}>
-        <FlatList
-          data={requests}
-          renderItem={({ item }) => (
-            <View>
-              <TouchableOpacity style={style.row}>
-                <View style={{ width: "5%" }} />
-                <View style={{ justifyContent: "center" }}>
-                  <Image
-                    source={{
-                      uri:
-                        item.key.senderImage == image
-                          ? item.key.receiverImage
-                          : item.key.senderImage,
-                    }}
-                    style={style.imageStyle}
-                  />
-                </View>
-                <View style={{ width: "5%" }} />
-                <View style={{ justifyContent: "center" }}>
-                  <Text>
-                    {item.key.senderName == name
-                      ? item.key.receiverName
-                      : item.key.senderName}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+        {requests.length !== 0 ? (
+          <FlatList
+            data={requests}
+            renderItem={({ item }) => (
               <View
-                style={{ flexDirection: "row", justifyContent: "space-around" }}
+                style={{
+                  marginTop: 20,
+                  borderBottomWidth: 1,
+                  borderColor: "#bdc3c7",
+                }}
               >
-                <View style={{ width: "40%" }}>
-                  <RoundButton
-                    buttonStyle={style.signButton}
-                    label={constants.labelMessage}
-                    buttonColor={theme.appColor}
-                    labelStyle={theme.highlightTextColor}
-                    onPress={() => message(item)}
-                  />
-                </View>
+                <TouchableOpacity style={style.row}>
+                  <View style={{ width: "5%" }} />
+                  <View style={{ justifyContent: "center" }}>
+                    <Image
+                      source={{
+                        uri:
+                          item.key.senderImage == image
+                            ? item.key.receiverImage
+                            : item.key.senderImage,
+                      }}
+                      style={style.imageStyle}
+                    />
+                  </View>
+                  <View style={{ width: "5%" }} />
+                  <View style={{ justifyContent: "center" }}>
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "bold",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {item.key.senderName == name
+                        ? item.key.receiverName
+                        : item.key.senderName}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
-                <View style={{ width: "40%" }}>
-                  <RoundButton
-                    buttonStyle={style.signButton}
-                    label={constants.labelContact}
-                    buttonColor={theme.appColor}
-                    labelStyle={theme.highlightTextColor}
-                    onPress={() => contact(item)}
-                    //   //onPress={goToHome}
-                  />
+                {/* <View style={{height: 1,backgroundColor:'gray'}}></View> */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <View style={{ width: "40%" }}>
+                    <RoundButton
+                      buttonStyle={style.signButton}
+                      label={constants.labelMessage}
+                      buttonColor={theme.appColor}
+                      labelStyle={theme.highlightTextColor}
+                      onPress={() => message(item)}
+                    />
+                  </View>
+
+                  <View style={{ width: "40%" }}>
+                    <RoundButton
+                      buttonStyle={style.signButton}
+                      label={constants.labelContact}
+                      buttonColor={theme.appColor}
+                      labelStyle={theme.highlightTextColor}
+                      onPress={() => contact(item)}
+                      //   //onPress={goToHome}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-        />
-        {/*
+            )}
+          />
+        ) : (
+          <View style={{ marginTop: 20 }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              No Record Found{" "}
+            </Text>
+          </View>
+        )}
+      </View>
+      {/*
         <ImageBackground source={ImagePath} style={style.imageStyle} >
           <View style={[style.topContainer, style.nexStyle]}>
             <ThemedText styleKey="highlightTextColor" style={[style.textStyle, style.specialText]}>{constants.searching}</ThemedText>
@@ -213,7 +284,6 @@ const Searching: React.FunctionComponent<Props> = ({ history }: Props) => {
         </ImageBackground>
         <FooterNavigation history={history} />  
         */}
-      </View>
     </>
   );
 };
@@ -222,6 +292,9 @@ export default Searching;
 
 interface Style {
   container: ViewStyle;
+  toolbar: ViewStyle;
+  toolbarButton: ViewStyle;
+  toolbarTitle: ViewStyle;
   mainContainer: ViewStyle;
   topContainer: ViewStyle;
   childContainer: ViewStyle;
@@ -313,9 +386,9 @@ const style: Style = StyleSheet.create<Style>({
     fontSize: 40,
   },
   imageStyle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
   bottomContent: {
     flex: 1,
@@ -334,7 +407,23 @@ const style: Style = StyleSheet.create<Style>({
   row: {
     flexDirection: "row",
     marginBottom: 20,
-    borderBottomWidth: 1,
-    borderColor: "#bdc3c7",
+  },
+  toolbar: {
+    backgroundColor: "#f39c12",
+    paddingBottom: 10,
+    flexDirection: "row",
+    paddingTop: 20, //Step 1
+  },
+  toolbarButton: {
+    //Step 2
+    color: "#fff",
+    textAlign: "center",
+  },
+  toolbarTitle: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
+    flex: 1,
+    fontSize: 20, //Step 3
   },
 });
