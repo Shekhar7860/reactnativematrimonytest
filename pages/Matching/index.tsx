@@ -24,7 +24,10 @@ import Swiper from "react-native-deck-swiper";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import RNUpiPayment from "react-native-upi-payment";
-
+import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType, RewardedAdEventType  } from '@react-native-firebase/admob';
+const interstitial = InterstitialAd.createForAdRequest('ca-app-pub-3671018146205481/6402975214', {
+  requestNonPersonalizedAdsOnly: true,
+});
 // @ts-ignore
 const ImagePath = require("../../images/dual-tone.png");
 const cross = require("../../images/cross.png");
@@ -77,6 +80,13 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   useEffect(() => {
+    interstitial.onAdEvent((type) => {
+      if (type === AdEventType.LOADED) {
+        interstitial.show();
+      }
+    });
+    
+    interstitial.load();
     database()
       .ref("user")
       .child(auth().currentUser.uid)
@@ -310,6 +320,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
         </ImageBackground>
       </ScrollView>
       <FooterNavigation history={history} />
+      <BannerAd unitId={'ca-app-pub-3671018146205481/6356719663'} size={BannerAdSize.FULL_BANNER}/>
     </View>
   );
 };

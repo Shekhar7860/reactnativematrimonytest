@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { RouteComponentProps } from "react-router-native";
 import { Dispatch } from "redux";
 import {
@@ -32,7 +32,7 @@ import storage from "@react-native-firebase/storage";
 import RNFetchBlob from "react-native-fetch-blob";
 import auth from "@react-native-firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
-
+import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType  } from '@react-native-firebase/admob';
 interface LoginField {
   username?: string;
   email?: string;
@@ -52,7 +52,19 @@ interface Props extends RouteComponentProps {
 }
 
 const girl = require("../../images/new-profile.jpg");
+const interstitial = InterstitialAd.createForAdRequest('ca-app-pub-3671018146205481/5043637990', {
+  requestNonPersonalizedAdsOnly: true,
+});
 const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
+  useEffect(() => {
+    interstitial.onAdEvent((type) => {
+      if (type === AdEventType.LOADED) {
+        interstitial.show();
+      }
+    });
+    
+    interstitial.load();
+  }, [])
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
   const [selected, setSelected] = useState<Boolean>(false);
@@ -299,6 +311,8 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
 
   const profilePicApi = (image, props) => {};
   const goToHome = () => {
+    if(imageRef != "")
+    {
     setLoader(true);
     const errors: ValidationError = validate({
       username: username,
@@ -355,6 +369,10 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
     } else {
       setErrors(errors);
     }
+  }
+  else{
+    Alert.alert("Please upload image")
+  }
 
     // history.push('/gender/')
   };
@@ -369,7 +387,6 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
         cancelable={false}
         textStyle={{ color: "#FFF" }}
       />
-
       <View style={style.mainContainer}>
         <ScrollView>
           <ImageBackground source={ImagePath} style={style.imageStyle}>
@@ -544,6 +561,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
           </View>
         </ScrollView>
       </View>
+      <BannerAd unitId={'ca-app-pub-3671018146205481/8982883008'} size={BannerAdSize.FULL_BANNER}/>
     </>
   );
 };

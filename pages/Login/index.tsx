@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { RouteComponentProps } from "react-router-native";
 import { Dispatch } from "redux";
 import {
@@ -27,7 +27,10 @@ import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import Spinner from "react-native-loading-spinner-overlay";
 import AsyncStorage from "@react-native-community/async-storage";
-
+import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType, RewardedAdEventType  } from '@react-native-firebase/admob';
+const rewarded = RewardedAd.createForAdRequest('ca-app-pub-3671018146205481/6165147971', {
+  requestNonPersonalizedAdsOnly: true,
+});
 interface LoginField {
   username?: string;
   password?: string;
@@ -42,6 +45,18 @@ interface Props extends RouteComponentProps {
 }
 
 const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
+  useEffect(() => {
+    rewarded.onAdEvent((type, error, reward) => {
+      if (type === RewardedAdEventType.LOADED) {
+        rewarded.show();
+      }
+      if (type === RewardedAdEventType.EARNED_REWARD) {
+        console.log('User earned reward of ', reward);
+      }
+    });
+    
+    rewarded.load();
+  }, [])
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
   const [visible, setLoader] = useState(false);
@@ -234,6 +249,7 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
           </View>
         </View>
       </ScrollView>
+      <BannerAd unitId={'ca-app-pub-3671018146205481/7669801331'} size={BannerAdSize.FULL_BANNER}/>
     </View>
   );
 };
