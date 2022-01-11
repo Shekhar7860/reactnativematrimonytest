@@ -8,12 +8,12 @@ import {
     TouchableOpacity,
     Image,
     ImageStyle,
+    NativeModules
 } from "react-native";
 import { AppTheme } from "../../config/DefaultConfig";
 import useTheme from "../../hooks/useTheme";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
-import RNUpiPayment from "react-native-upi-payment";
 
 // @ts-ignore
 const home = require("../../images/home.png");
@@ -29,6 +29,8 @@ interface Props extends RouteComponentProps {
 const FooterNavigation: React.FunctionComponent<Props> = ({
     history,
 }: Props) => {
+    console.log('inside footer navigation')
+    const UPI = NativeModules.UPI;
     const theme: AppTheme = useTheme();
 
     const backButton = () => {
@@ -41,17 +43,28 @@ const FooterNavigation: React.FunctionComponent<Props> = ({
 
     const successCallback = (res) => {
         console.log("res", res);
+        
+    };
+
+    const failureCallback = (err) => {
+        console.log("res", err);
+    };
+
+    const openLink = async () => {
+        const amount = 1;
+        let UpiUrl =
+          "upi://pay?pa=9646407363@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=" +
+          amount +
+          "&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp";
+        let response = await UPI.openLink(UpiUrl);
         database()
             .ref("/user")
             .child(auth().currentUser.uid)
             .update({
                 premium: true,
             });
-    };
+      };
 
-    const failureCallback = (err) => {
-        console.log("res", err);
-    };
 
     const goToSearching = () => {
         database()
@@ -60,16 +73,7 @@ const FooterNavigation: React.FunctionComponent<Props> = ({
             .once("value")
             .then((dataSnapshot) => {
                 if (dataSnapshot.val().premium == false) {
-                    RNUpiPayment.initializePayment(
-                        {
-                            vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
-                            payeeName: "John Doe",
-                            amount: "101",
-                            transactionRef: "aasf-332-aoei-fn",
-                        },
-                        successCallback,
-                        failureCallback
-                    );
+                   openLink()
                 } else {
                     history.push("/message");
                 }
@@ -77,6 +81,7 @@ const FooterNavigation: React.FunctionComponent<Props> = ({
     };
 
     const goToSetting = () => {
+        console.log('here')
         history.push("/searching");
     };
 
@@ -85,7 +90,7 @@ const FooterNavigation: React.FunctionComponent<Props> = ({
     };
 
     return (
-        <View
+        <TouchableOpacity
             style={[
                 style.container,
                 {
@@ -119,7 +124,7 @@ const FooterNavigation: React.FunctionComponent<Props> = ({
                     <Image source={contact} style={style.logoImage} />
                 </View>
             </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -139,10 +144,10 @@ const style: Style = StyleSheet.create<Style>({
         position: "absolute",
         padding: 10,
         bottom: 0,
-        flex: 1,
         width: "100%",
         alignItems: "center",
         borderTopWidth: 2,
+        zIndex: 1,
     },
     iconContainer: {
         alignItems: "center",

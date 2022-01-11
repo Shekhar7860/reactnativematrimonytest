@@ -12,6 +12,7 @@ import {
   ScrollView,
   Platform,
   Alert,
+  NativeModules
 } from "react-native";
 import { Dispatch } from "redux";
 import { AppTheme, AppConstants } from "../../config/DefaultConfig";
@@ -23,7 +24,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Swiper from "react-native-deck-swiper";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
-import RNUpiPayment from "react-native-upi-payment";
+// import RNUpiPayment from "react-native-upi-payment";
 import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType, RewardedAdEventType  } from '@react-native-firebase/admob';
 const interstitial = InterstitialAd.createForAdRequest('ca-app-pub-3671018146205481/6402975214', {
   requestNonPersonalizedAdsOnly: true,
@@ -43,6 +44,7 @@ interface Props extends RouteComponentProps {
 }
 
 const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
+  const UPI = NativeModules.UPI;
   const [items, setItems] = useState([]);
   const [user, setUser] = useState({});
   const [image, setImage] = useState("");
@@ -56,6 +58,22 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
     history.push("/gender");
   };
 
+  const openLink = async () => {
+    const amount = 1;
+    let UpiUrl =
+      "upi://pay?pa=9646407363@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=" +
+      amount +
+      "&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp";
+    let response = await UPI.openLink(UpiUrl);
+    database()
+        .ref("/user")
+        .child(auth().currentUser.uid)
+        .update({
+            premium: true,
+        });
+  };
+
+
   const goToMatched = () => {
     database()
       .ref("user")
@@ -63,16 +81,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
       .once("value")
       .then((dataSnapshot) => {
         if (dataSnapshot.val().premium == false) {
-          RNUpiPayment.initializePayment(
-            {
-              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
-              payeeName: "John Doe",
-              amount: "101",
-              transactionRef: "aasf-332-aoei-fn",
-            },
-            successCallback,
-            failureCallback
-          );
+       openUPILink()
         } else {
           history.push("/message");
         }
@@ -94,7 +103,10 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
       .then((dataSnapshot) => {
         console.group("snap", dataSnapshot.val());
         setUser(dataSnapshot.val());
+        if(dataSnapshot.val().image)
+        {
         setImage(dataSnapshot.val().image);
+        }
         setName(dataSnapshot.val().name);
         if (dataSnapshot.val().gender == "male") {
           database()
@@ -144,6 +156,22 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
     console.log("res", err);
   };
 
+
+  const openUPILink = async () => {
+    const amount = 1;
+    let UpiUrl =
+      "upi://pay?pa=9646407363@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=" +
+      amount +
+      "&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp";
+    let response = await UPI.openLink(UpiUrl);
+    database()
+        .ref("/user")
+        .child(auth().currentUser.uid)
+        .update({
+            premium: true,
+        });
+  }; 
+
   const contact = (item) => {
     database()
       .ref("user")
@@ -151,16 +179,7 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
       .once("value")
       .then((dataSnapshot) => {
         if (dataSnapshot.val().premium == false) {
-          RNUpiPayment.initializePayment(
-            {
-              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
-              payeeName: "John Doe",
-              amount: "101",
-              transactionRef: "aasf-332-aoei-fn",
-            },
-            successCallback,
-            failureCallback
-          );
+         openUPILink()
         } else {
           Alert.alert("contact is " + item.phone);
         }
@@ -239,14 +258,15 @@ const Matching: React.FunctionComponent<Props> = ({ history }: Props) => {
               // console.log("card", items);
               return (
                 <View style={style.card}>
+                 
                   <Image
                     source={{
-                      uri: image !== card.image ? card.image : girlImageUri,
+                      uri: card && card.image ? image !== card.image ? card.image : girlImageUri : girlImageUri,
                     }}
                     style={style.imageCard}
                   />
                   <ThemedText styleKey="cardTextColor" style={style.text}>
-                    {card ? card.username : null}
+                    {card && card.username ? card.username : null}
                   </ThemedText>
                   <View style={style.childContainer}>
                     <TouchableOpacity>

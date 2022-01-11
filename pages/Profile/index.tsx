@@ -11,6 +11,7 @@ import {
   ImageStyle,
   ImageBackground,
   ScrollView,
+  NativeModules
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
 import ThemedText from "../../components/UI/ThemedText";
@@ -21,7 +22,7 @@ import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import useTheme from "../../hooks/useTheme";
 import FooterNavigation from "../Footer/Index";
 import auth from "@react-native-firebase/auth";
-import RNUpiPayment from "react-native-upi-payment";
+
 import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType, RewardedAdEventType  } from '@react-native-firebase/admob';
 const rewarded = RewardedAd.createForAdRequest('ca-app-pub-3671018146205481/7873621947', {
   requestNonPersonalizedAdsOnly: true,
@@ -45,6 +46,7 @@ interface Props extends RouteComponentProps {
 
 const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
+  const UPI = NativeModules.UPI;
   const theme: AppTheme = useTheme();
   const [image, setImage] = useState(girlImageUri);
 
@@ -87,23 +89,30 @@ const Profile: React.FunctionComponent<Props> = ({ history }: Props) => {
     history.push("/premium");
   };
 
+  const openUPILink = async () => {
+    const amount = 1;
+    let UpiUrl =
+      "upi://pay?pa=9646407363@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=" +
+      amount +
+      "&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp";
+    let response = await UPI.openLink(UpiUrl);
+    database()
+        .ref("/user")
+        .child(auth().currentUser.uid)
+        .update({
+            premium: true,
+        });
+  }; 
+
   const goToMessage = () => {
+    
     database()
       .ref("user")
       .child(auth().currentUser.uid)
       .once("value")
       .then((dataSnapshot) => {
         if (dataSnapshot.val().premium == false) {
-          RNUpiPayment.initializePayment(
-            {
-              vpa: "9646407363@ybl", // or can be john@ybl or mobileNo@upi
-              payeeName: "John Doe",
-              amount: "101",
-              transactionRef: "aasf-332-aoei-fn",
-            },
-            successCallback,
-            failureCallback
-          );
+         openUPILink()
         } else {
           history.push("/message");
         }

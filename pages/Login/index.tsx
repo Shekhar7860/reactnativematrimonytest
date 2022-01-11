@@ -12,6 +12,7 @@ import {
   ImageStyle,
   ImageBackground,
   Alert,
+  NativeModules
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
 import ThemedText from "../../components/UI/ThemedText";
@@ -45,6 +46,7 @@ interface Props extends RouteComponentProps {
 }
 
 const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
+  const UPI = NativeModules.UPI;
   useEffect(() => {
     rewarded.onAdEvent((type, error, reward) => {
       if (type === RewardedAdEventType.LOADED) {
@@ -60,6 +62,16 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
   const [visible, setLoader] = useState(false);
+
+  const openLink = async () => {
+    const amount = 1;
+    let UpiUrl =
+      "upi://pay?pa=9646407363@ybl&pn=dhaval&tr=kdahskjahs27575fsdfasdas&am=" +
+      amount +
+      "&mam=null&cu=INR&url=https://MyUPIApp&refUrl=https://MyUPIApp";
+    let response = await UPI.openLink(UpiUrl);
+    console.log(response); //however you want to handle response
+  };
 
   const validate = (data: LoginField): ValidationError => {
     const errors = microValidator.validate(
@@ -112,6 +124,7 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
           })
           .catch((error) => {
             Alert.alert(error.toString());
+            setLoader(false);
           });
       } catch (error) {
         setLoader(false);
@@ -137,7 +150,8 @@ const Login: React.FunctionComponent<Props> = ({ history }: Props) => {
   };
 
   const goToSignup = () => {
-    history.push("/signup");
+    // openLink()
+   history.push("/signup");
   };
 
   return (

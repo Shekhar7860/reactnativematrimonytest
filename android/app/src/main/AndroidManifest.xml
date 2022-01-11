@@ -5,16 +5,22 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-feature android:name="android.hardware.camera" />
+<uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="com.google.android.apps.photos.permission.GOOGLE_PHOTOS"/>
-
+<uses-sdk tools:overrideLibrary="com.stripe.android, com.stripe.android.stripe3ds2, com.imagepicker"/>
     <application
+    android:requestLegacyExternalStorage="true"
+     android:hardwareAccelerated="true" 
       android:name=".MainApplication"
+      android:usesCleartextTraffic="true"
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher"
       android:allowBackup="false"
       tools:replace="name"
       android:theme="@style/AppTheme">
+  
         <meta-data
     android:name="com.google.android.gms.ads.APPLICATION_ID"
     android:value="ca-app-pub-3671018146205481~3968383561"
@@ -30,7 +36,22 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <intent-filter android:label="MyUPIApp">
+  <action android:name="android.intent.action.VIEW" />
+  <category android:name="android.intent.category.DEFAULT" />
+  <category android:name="android.intent.category.BROWSABLE" />
+  <data android:scheme="https" android:host="MyUPIApp" />
+</intent-filter>
       </activity>
+      <provider
+             android:name="androidx.core.content.FileProvider"
+             android:authorities="com.mydomain.fileprovider"
+             android:exported="false"
+             android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
         <activity
   android:name="com.google.android.gms.ads.AdActivity"
   android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />

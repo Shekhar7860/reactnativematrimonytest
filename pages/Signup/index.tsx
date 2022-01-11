@@ -27,7 +27,7 @@ import microValidator from "micro-validator";
 import { ValidationError } from "../../config/validation";
 import Input from "../../components/Base/Input";
 import database from "@react-native-firebase/database";
-import ImagePicker from "react-native-image-picker";
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import storage from "@react-native-firebase/storage";
 import RNFetchBlob from "react-native-fetch-blob";
 import auth from "@react-native-firebase/auth";
@@ -144,31 +144,18 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
         path: "images",
       },
     };
-
-    ImagePicker.showImagePicker(options, (response) => {
-      console.log("Response = ", response);
-
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
-      } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
-      } else {
-        console.group("ui", response);
-        const source = { uri: response.uri };
-        setImage(source);
-        console.group("sss", source);
-        if (
-          response.uri.includes("myprovider") ||
-          response.uri.includes("provider")
-        ) {
-          uploadImage(source);
-        } else {
-          getPathForFirebaseStorage(response.uri);
-        }
-      }
-    });
+    let response = await launchImageLibrary(options);
+    console.log('response', response.assets[0].uri)
+    const source = { uri: response.assets[0].uri };
+    setImage(source);
+    if (
+      response.assets[0].uri.includes("myprovider") ||
+      response.assets[0].uri.includes("provider")
+    ) {
+      uploadImage(source);
+    } else {
+      getPathForFirebaseStorage(response.assets[0].uri);
+    }
   };
 
   const uriToBlob = (uri) => {
@@ -361,6 +348,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
           })
           .catch((error) => {
             Alert.alert(error.toString());
+            setLoader(false);
           });
       } catch (error) {
         Alert.alert(error.toString(error));

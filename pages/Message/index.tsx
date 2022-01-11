@@ -7,11 +7,13 @@ import {
   FlatList,
   StyleSheet,
   TextStyle,
+  Text,
   Image,
   ImageStyle,
   ImageBackground,
   TouchableOpacity,
   ScrollView,
+  NativeModules
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
 import ThemedText from "../../components/UI/ThemedText";
@@ -22,7 +24,7 @@ import FooterNavigation from "../Footer/Index";
 import UserItem from "../../components/Base/UserItem";
 import database from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
-import RNUpiPayment from "react-native-upi-payment";
+// import RNUpiPayment from "react-native-upi-payment";
 const girlImageUri =
   "https://i.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY";
 // @ts-ignore
@@ -43,6 +45,7 @@ interface Props extends RouteComponentProps {
 }
 
 const Message: React.FunctionComponent<Props> = ({ history }: Props) => {
+  const UPI = NativeModules.UPI;
   const constants: AppConstants = useConstants();
   const theme: AppTheme = useTheme();
 
