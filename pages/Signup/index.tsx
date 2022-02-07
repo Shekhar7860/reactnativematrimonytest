@@ -1,38 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { RouteComponentProps } from "react-router-native";
-import { Dispatch } from "redux";
+import { AdEventType, BannerAd, BannerAdSize, InterstitialAd, RewardedAd, TestIds } from '@react-native-firebase/admob';
 import {
+  Alert,
+  Button,
+  Image,
+  ImageBackground,
+  ImageStyle,
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextStyle,
+  TouchableOpacity,
   View,
   ViewStyle,
-  StyleSheet,
-  Alert,
-  TextStyle,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ImageStyle,
-  ImageBackground,
-  Platform,
-  PermissionsAndroid,
-  Button,
 } from "react-native";
 import { AppConstants, AppTheme } from "../../config/DefaultConfig";
-import ThemedText from "../../components/UI/ThemedText";
-import useConstants from "../../hooks/useConstants";
-import RoundButton from "../../components/Base/RoundButton";
-import Icon from "react-native-vector-icons/FontAwesome";
-import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import useTheme from "../../hooks/useTheme";
-import microValidator from "micro-validator";
-import { ValidationError } from "../../config/validation";
-import Input from "../../components/Base/Input";
-import database from "@react-native-firebase/database";
+import React, { useEffect, useState } from "react";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import storage from "@react-native-firebase/storage";
+
+import { Dispatch } from "redux";
+import Icon from "react-native-vector-icons/FontAwesome";
+import Input from "../../components/Base/Input";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import RNFetchBlob from "react-native-fetch-blob";
-import auth from "@react-native-firebase/auth";
+import RoundButton from "../../components/Base/RoundButton";
+import { RouteComponentProps } from "react-router-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize, AdEventType  } from '@react-native-firebase/admob';
+import ThemedText from "../../components/UI/ThemedText";
+import { ValidationError } from "../../config/validation";
+import auth from "@react-native-firebase/auth";
+import database from "@react-native-firebase/database";
+import microValidator from "micro-validator";
+import storage from "@react-native-firebase/storage";
+import useConstants from "../../hooks/useConstants";
+import useTheme from "../../hooks/useTheme";
+
 interface LoginField {
   username?: string;
   email?: string;
@@ -328,6 +330,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 id: res.user._user.uid,
                 premium: false,
                 age: age,
+                date : new Date().toString()
               });
 
             database()
@@ -341,6 +344,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 id: res.user._user.uid,
                 premium: false,
                 age: age,
+                date : new Date().toString()
               });
             setLoader(false);
             // history.push("/gender/");
@@ -460,6 +464,7 @@ const Signup: React.FunctionComponent<Props> = ({ history }: Props) => {
                 errors={errors.phone}
                 icon="mobile1"
                 choose={true}
+                maxLength={10}
               />
               <Input
                 placeholder={"age"}
